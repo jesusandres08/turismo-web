@@ -453,4 +453,18 @@ function turismo_get_playlist_videos( $playlist_id ) {
     return array();
 }
 
-?>
+/**
+ * Incluir el walker personalizado para iconos en el menú
+ */
+require_once get_template_directory() . '/inc/class-turismo-menu-icons-walker.php';
+
+/**
+ * Usar el walker personalizado para el menú principal
+ */
+function turismo_wp_nav_menu_args($args) {
+    if (isset($args['theme_location']) && $args['theme_location'] === 'primary') {
+        $args['walker'] = new Turismo_Menu_Icons_Walker();
+    }
+    return $args;
+}
+add_filter('wp_nav_menu_args', 'turismo_wp_nav_menu_args');
