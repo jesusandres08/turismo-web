@@ -1,0 +1,209 @@
+═══════════════════════════════════════════════════════════
+    VIDEOS EN LA PÁGINA DE INICIO
+    Configuración Rápida
+═══════════════════════════════════════════════════════════
+
+🎉 NUEVO: LISTA DE VIDEOS ESTILO PORTAL_CHOIX
+═══════════════════════════════════════════════════════════
+
+Los videos ahora se muestran con:
+✅ Reproductor principal a la izquierda
+✅ Lista numerada de videos a la derecha
+✅ Thumbnails con duración (ej: 02:13)
+✅ Click para cambiar video
+✅ Doble click para pantalla completa
+
+Lee: GALERIA-VIDEOS-LISTA.txt para más detalles
+
+═══════════════════════════════════════════════════════════
+
+✅ YA ESTÁ CONFIGURADO!
+
+Los videos ya aparecen automáticamente en tu página de inicio.
+
+Estructura de la Home:
+┌─────────────────────────────────────────┐
+│ 1. Header con Logo y Menú              │
+├─────────────────────────────────────────┤
+│ 2. Slider de Posts Destacados          │
+├─────────────────────────────────────────┤
+│ 3. VIDEOS DESTACADOS ← NUEVO!          │ ← Aquí están
+├─────────────────────────────────────────┤
+│ 4. Lista de Posts del Blog             │
+├─────────────────────────────────────────┤
+│ 5. Sidebar                              │
+├─────────────────────────────────────────┤
+│ 6. Footer                               │
+└─────────────────────────────────────────┘
+
+
+══════════════════════════════════════════════════════════
+PERSONALIZAR LA PLAYLIST QUE SE MUESTRA
+══════════════════════════════════════════════════════════
+
+Archivo: template-parts/videos-home.php
+Línea: 10
+
+Edita esta sección:
+
+$playlist_destacada = array(
+    'nombre'      => 'Videos Destacados',      // ← Cambia el título
+    'playlist_id' => 'PLrAXtmErZgOe...',       // ← Tu playlist ID
+    'descripcion' => 'Descubre los mejores destinos', // ← Descripción
+    'icono'       => 'fa-video',               // ← Ícono (opcional)
+);
+
+
+══════════════════════════════════════════════════════════
+CÓMO OBTENER EL PLAYLIST ID
+══════════════════════════════════════════════════════════
+
+1. Ve a YouTube.com
+2. Abre tu playlist (o cualquier playlist pública)
+3. La URL será algo como:
+   https://www.youtube.com/playlist?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf
+
+4. Copia solo la parte después de "list="
+   PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf
+
+5. Pégalo en el campo 'playlist_id'
+
+
+══════════════════════════════════════════════════════════
+CAMBIAR EL ÍCONO
+══════════════════════════════════════════════════════════
+
+Íconos disponibles (Font Awesome):
+
+'icono' => 'fa-video',          // Video
+'icono' => 'fa-play-circle',    // Play
+'icono' => 'fa-film',           // Película
+'icono' => 'fa-youtube',        // YouTube
+'icono' => 'fa-photo-video',    // Foto/Video
+'icono' => 'fa-camera',         // Cámara
+'icono' => 'fa-video-camera',   // Videocámara
+
+
+══════════════════════════════════════════════════════════
+EJEMPLO COMPLETO
+══════════════════════════════════════════════════════════
+
+// Playlist sobre playas mexicanas
+$playlist_destacada = array(
+    'nombre'      => 'Playas Paradisíacas de México',
+    'playlist_id' => 'PLxxxxxxxxxxxxxxxxx',
+    'descripcion' => 'Explora las mejores playas de la Riviera Maya y el Caribe Mexicano',
+    'icono'       => 'fa-umbrella-beach',
+);
+
+
+══════════════════════════════════════════════════════════
+CÓMO EDITAR EL ARCHIVO
+══════════════════════════════════════════════════════════
+
+Opción 1: Desde WordPress Admin
+────────────────────────────────
+
+1. WordPress Admin → Apariencia → Editor de archivos del tema
+2. Busca en la lista: template-parts/videos-home.php
+3. Edita la línea 10
+4. Click en "Actualizar archivo"
+
+
+Opción 2: Desde el Explorador de Archivos
+──────────────────────────────────────────
+
+1. Abre: C:\xampp\htdocs\wordpress\wp-content\themes\turismo-theme\template-parts\videos-home.php
+2. Edita con un editor de texto (Notepad++, VS Code, etc.)
+3. Guarda el archivo
+
+
+══════════════════════════════════════════════════════════
+OCULTAR LA SECCIÓN DE VIDEOS (Si no la quieres)
+══════════════════════════════════════════════════════════
+
+Archivo: index.php
+Líneas: 27-32
+
+Comenta o elimina estas líneas:
+
+<?php
+// Mostrar videos destacados solo en la página de inicio
+if ( is_home() && ! is_paged() ) {
+    get_template_part( 'template-parts/videos-home' );
+}
+?>
+
+Para comentar, agrega // al inicio de cada línea:
+// get_template_part( 'template-parts/videos-home' );
+
+
+══════════════════════════════════════════════════════════
+FUNCIONALIDADES INCLUIDAS
+══════════════════════════════════════════════════════════
+
+✅ Reproductor de playlist integrado
+✅ Botón "Pantalla completa" con modal
+✅ Botón "Ver galería completa" → /videos
+✅ Badge amarillo con ícono
+✅ Título y descripción personalizables
+✅ Diseño responsive (móvil, tablet, desktop)
+✅ Autoplay de videos en la playlist
+✅ Estilos consistentes con portal_choix
+
+
+══════════════════════════════════════════════════════════
+VER TU PÁGINA DE INICIO
+══════════════════════════════════════════════════════════
+
+URL: http://localhost/wordpress
+     (o tu-sitio.com)
+
+Deberías ver:
+1. Header
+2. Slider de posts (5 slides)
+3. Sección "Videos Destacados" ← NUEVO
+4. Posts del blog
+5. Footer
+
+
+══════════════════════════════════════════════════════════
+SOLUCIÓN DE PROBLEMAS
+══════════════════════════════════════════════════════════
+
+Problema: No veo la sección de videos
+──────────────────────────────────────
+- Verifica que estés en la página de inicio (home)
+- Recarga la página (Ctrl + F5)
+- Verifica que el archivo videos-home.php exista
+
+Problema: El video no se reproduce
+───────────────────────────────────
+- Verifica el playlist_id
+- Asegúrate de que la playlist sea PÚBLICA
+- Prueba abrir la playlist en YouTube
+
+Problema: Sale error de playlist
+─────────────────────────────────
+- El ID está mal copiado
+- La playlist fue eliminada
+- La playlist es privada
+
+
+══════════════════════════════════════════════════════════
+MÁS OPCIONES
+══════════════════════════════════════════════════════════
+
+¿Quieres mostrar múltiples playlists?
+- Duplica el bloque en videos-home.php
+- Cambia el playlist_id en cada uno
+
+¿Quieres cambiar el orden?
+- Edita index.php
+- Mueve el bloque de videos antes o después del slider
+
+¿Quieres una galería completa?
+- Visita: tu-sitio.com/videos
+- Ahí tienes categorías y más playlists
+
+═══════════════════════════════════════════════════════════

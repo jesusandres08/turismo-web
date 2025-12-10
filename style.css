@@ -1,0 +1,40 @@
+/*
+Theme Name: Turismo Custom
+Theme URI: http://turismo-custom.local
+Author: Tu Nombre
+Author URI: http://tudominio.com
+Description: Theme custom para sistema de turismo
+Version: 1.0.0
+License: GPL v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: turismo-custom
+Domain Path: /languages
+*/
+
+/* Aquí irán los estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+}
+
+a {
+    color: #0073aa;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #005a87;
+}

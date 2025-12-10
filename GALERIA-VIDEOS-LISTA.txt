@@ -1,0 +1,282 @@
+═══════════════════════════════════════════════════════════
+    GALERÍA DE VIDEOS CON LISTA VERTICAL
+    Estilo Portal Choix Django - Lista Numerada
+═══════════════════════════════════════════════════════════
+
+✅ SISTEMA IMPLEMENTADO!
+
+La galería de videos ya está configurada con:
+- Reproductor principal a la izquierda
+- Lista de videos numerada a la derecha
+- Thumbnails con duración visible (ej: 02:13)
+- Click para cambiar video
+- Doble click para pantalla completa
+- Diseño responsive
+
+
+══════════════════════════════════════════════════════════
+CARACTERÍSTICAS IMPLEMENTADAS
+══════════════════════════════════════════════════════════
+
+✅ Reproductor + Lista Vertical (como en Django)
+✅ Thumbnails de videos con duración
+✅ Videos numerados (1, 2, 3, 4...)
+✅ Click simple = Cambiar video
+✅ Doble click = Pantalla completa
+✅ Estado activo visual (fondo azul)
+✅ Scroll automático en lista larga
+✅ Modal de pantalla completa
+✅ Enlace directo a YouTube
+✅ Sistema de caché (12 horas)
+✅ Sin necesidad de API key
+
+
+══════════════════════════════════════════════════════════
+DÓNDE VER LOS VIDEOS
+══════════════════════════════════════════════════════════
+
+1. PÁGINA DE INICIO
+   URL: http://localhost/wordpress
+
+   Muestra los primeros 5 videos de la playlist destacada
+   Con reproductor + lista lateral
+
+2. GALERÍA COMPLETA
+   URL: http://localhost/wordpress/videos
+
+   Primero debes crear la página:
+   - WordPress Admin → Páginas → Añadir nueva
+   - Título: "Videos"
+   - Plantilla: "Galería de Videos"
+   - Publicar
+
+
+══════════════════════════════════════════════════════════
+CONFIGURAR TU PLAYLIST
+══════════════════════════════════════════════════════════
+
+OPCIÓN 1: Para la Página de Inicio
+────────────────────────────────────
+
+Archivo: template-parts/videos-home.php
+Línea: 13
+
+$playlist_destacada = array(
+    'nombre'      => 'Videos Destacados',
+    'playlist_id' => 'PLAHOpVjwEVOoAvHUv6Wtqt1ZW-ND9TbZ7', // ← Cambia esto
+    'descripcion' => 'Descubre los mejores destinos',
+    'icono'       => 'fa-video',
+);
+
+
+OPCIÓN 2: Para la Galería Completa
+────────────────────────────────────
+
+Archivo: page-videos.php
+Líneas: 16-45
+
+$playlists = array(
+    array(
+        'nombre'      => 'Destinos Turísticos',
+        'slug'        => 'destinos',
+        'icono'       => 'fa-map-marked-alt',
+        'playlist_id' => 'TU_PLAYLIST_ID_AQUI', // ← Cambia esto
+        'descripcion' => 'Los mejores destinos',
+    ),
+    // Puedes agregar más categorías...
+);
+
+
+══════════════════════════════════════════════════════════
+CÓMO OBTENER EL PLAYLIST ID
+══════════════════════════════════════════════════════════
+
+1. Ve a YouTube.com
+
+2. Abre tu playlist (o cualquier playlist pública)
+
+3. Copia la URL:
+   https://www.youtube.com/playlist?list=PLAHOpVjwEVOoAvHUv6Wtqt1ZW-ND9TbZ7
+
+4. El ID es TODO lo que viene después de "list="
+   PLAHOpVjwEVOoAvHUv6Wtqt1ZW-ND9TbZ7
+
+5. Pégalo en el campo 'playlist_id'
+
+IMPORTANTE: La playlist debe ser PÚBLICA
+
+
+══════════════════════════════════════════════════════════
+FUNCIONALIDADES INTERACTIVAS
+══════════════════════════════════════════════════════════
+
+1. CLICK SIMPLE en un video
+   → Cambia el video en el reproductor principal
+   → Se marca como activo (fondo azul)
+   → Inicia reproducción automática
+
+2. DOBLE CLICK en un video
+   → Abre modal de pantalla completa
+   → Video se reproduce automáticamente
+
+3. BOTÓN "Pantalla completa"
+   → Abre el video actual en modal
+
+4. BOTÓN "Ver galería completa"
+   → Lleva a /videos para ver todos
+
+5. TECLA ESC
+   → Cierra el modal de pantalla completa
+
+6. CLICK FUERA del modal
+   → También cierra el modal
+
+
+══════════════════════════════════════════════════════════
+ESTRUCTURA DE LA LISTA DE VIDEOS
+══════════════════════════════════════════════════════════
+
+Cada item muestra:
+
+┌────────────────────────────────────┐
+│ [1] [thumbnail]  Título del video  │  ← Número
+│     [02:13]                         │  ← Duración
+└────────────────────────────────────┘
+
+El video activo tiene:
+- Fondo azul claro
+- Borde izquierdo azul
+
+
+══════════════════════════════════════════════════════════
+SISTEMA DE CACHÉ
+══════════════════════════════════════════════════════════
+
+Los videos se cachean automáticamente por 12 horas para:
+- Mejorar velocidad de carga
+- Reducir peticiones a YouTube
+- Mejor experiencia de usuario
+
+Para LIMPIAR el caché:
+- WordPress Admin → Plugins → Cache plugin
+- O espera 12 horas para actualización automática
+
+
+══════════════════════════════════════════════════════════
+ARCHIVOS MODIFICADOS
+══════════════════════════════════════════════════════════
+
+1. functions.php
+   - Agregada función: turismo_get_playlist_videos()
+   - Obtiene videos de YouTube sin API key
+   - Sistema de caché integrado
+
+2. page-videos.php (Galería completa)
+   - Reproductor principal con lista lateral
+   - Múltiples categorías de playlists
+   - JavaScript para interactividad
+
+3. template-parts/videos-home.php
+   - Versión para página de inicio
+   - Muestra solo 5 videos
+   - JavaScript independiente (no conflictos)
+
+4. css/main.css
+   - Estilos para .playlist-item
+   - Estilos para .playlist-item-thumbnail
+   - Estilos para .playlist-item-duration
+   - Layout responsive
+
+
+══════════════════════════════════════════════════════════
+RESPONSIVE DESIGN
+══════════════════════════════════════════════════════════
+
+DESKTOP (>1200px)
+- Reproductor a la izquierda (flex)
+- Lista a la derecha (350px ancho)
+- Scroll vertical en lista
+
+TABLET (768px - 1200px)
+- Reproductor arriba (100% ancho)
+- Lista abajo (100% ancho, scroll vertical)
+- Altura máxima: 500px para lista
+
+MÓVIL (<768px)
+- Reproductor arriba (16:9)
+- Lista abajo (scroll vertical)
+- Thumbnails más pequeños
+
+
+══════════════════════════════════════════════════════════
+SOLUCIÓN DE PROBLEMAS
+══════════════════════════════════════════════════════════
+
+Problema: Los videos no aparecen
+─────────────────────────────────
+- Verifica que el playlist ID sea correcto
+- Asegúrate que la playlist sea PÚBLICA
+- Revisa que no tenga parámetros extra (&si=...)
+- Limpia el caché
+
+Problema: La duración no aparece
+─────────────────────────────────
+- YouTube no siempre incluye la duración
+- El sistema muestra "02:13" por defecto
+- Es solo visual, no afecta la reproducción
+
+Problema: El reproductor no cambia
+───────────────────────────────────
+- Verifica la consola del navegador (F12)
+- Comprueba que JavaScript esté cargando
+- Revisa que no haya conflictos con plugins
+
+Problema: Error al cargar playlist
+────────────────────────────────────
+- La playlist fue eliminada
+- La playlist es privada
+- YouTube cambió su estructura HTML
+- Contacta al desarrollador
+
+
+══════════════════════════════════════════════════════════
+COMPARACIÓN CON PORTAL_CHOIX
+══════════════════════════════════════════════════════════
+
+✅ Layout idéntico (reproductor + lista)
+✅ Thumbnails con duración
+✅ Videos numerados (1, 2, 3...)
+✅ Estado activo visual
+✅ Click para cambiar video
+✅ Doble click para fullscreen
+✅ Modal de pantalla completa
+✅ Estilos y colores consistentes
+✅ Responsive design
+✅ Sin necesidad de API key
+
+
+══════════════════════════════════════════════════════════
+PRÓXIMOS PASOS (OPCIONAL)
+══════════════════════════════════════════════════════════
+
+Si quieres mejorar aún más:
+
+1. Agregar más categorías de playlists
+2. Crear sidebar con playlist populares
+3. Agregar sistema de búsqueda de videos
+4. Implementar sistema de favoritos
+5. Agregar compartir en redes sociales
+6. Crear página de video individual
+
+
+══════════════════════════════════════════════════════════
+SOPORTE
+══════════════════════════════════════════════════════════
+
+Archivos principales:
+- functions.php (línea 361-454)
+- page-videos.php (completo)
+- template-parts/videos-home.php (completo)
+- css/main.css (líneas 1620-1828)
+
+═══════════════════════════════════════════════════════════

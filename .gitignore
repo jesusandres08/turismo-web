@@ -1,0 +1,29 @@
+# WordPress
+*.log
+.htaccess
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+nul
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Node modules (si usas npm)
+node_modules/
+package-lock.json
+
+# Archivos temporales
+*.tmp
+*.bak
+*.cache
+
+# Archivos de desarrollo
+.sass-cache/
+*.map
