@@ -413,14 +413,14 @@ body {
 #mobile-menu {
     position: fixed;
     top: 0;
-    left: -100%;
-    width: 280px;
+    left: 0;
+    width: 100%;
     height: 100vh;
     background: white;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
     z-index: 999;
     overflow-y: auto;
-    transition: left 0.3s ease;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
     padding: 0;
 }
 
@@ -434,7 +434,7 @@ body {
 }
 
 #mobile-menu.active {
-    left: 0;
+    transform: translateX(0);
 }
 
 /* Overlay oscuro */
@@ -2822,13 +2822,62 @@ label {
     }
 
     .top-bar {
-        padding: 15px 0 50px 0;
+        padding: 15px 0 30px 0;
+    }
+
+    .header-content {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+    }
+
+    .topbar-gob {
+        display: none;
+    }
+
+    .header-social {
+        display: none;
+    }
+
+    .site-branding {
+        order: 1;
+        margin: 0;
+    }
+
+    .logo-card {
+        padding: 8px 15px;
+        margin: 0;
+    }
+
+    .custom-logo-link img {
+        height: 45px;
+    }
+
+    .site-title {
+        font-size: 18px;
+    }
+
+    .header-search {
+        order: 2;
+        margin: 0;
+    }
+
+    .header-search form {
+        margin: 0;
+    }
+
+    .header-search input[type="search"] {
+        width: 120px;
+        padding: 8px 12px;
+        font-size: 14px;
     }
 
     .menu-wrapper {
         position: relative;
         z-index: 90;
         overflow: visible;
+        margin-top: -20px;
     }
 
     .main-navigation .nav-menu {
@@ -2836,8 +2885,13 @@ label {
     }
 
     #menu-btn {
-        display: block;
-        z-index: 100;
+        display: flex;
+        position: fixed;
+        right: 15px;
+        top: 15px;
+        z-index: 1000;
+        padding: 10px 14px;
+        font-size: 20px;
     }
 
 
@@ -3005,16 +3059,37 @@ label {
         padding: 0 15px;
     }
 
+    .top-bar {
+        padding: 10px 0 25px 0;
+    }
+
+    .header-content {
+        padding: 0 15px;
+    }
+
     .logo-card {
-        padding: 12px 25px;
+        padding: 6px 12px;
     }
 
     .custom-logo-link img {
-        height: 60px;
+        height: 40px;
     }
 
     .site-title {
-        font-size: 24px;
+        font-size: 16px;
+    }
+
+    .header-search input[type="search"] {
+        width: 100px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    #menu-btn {
+        right: 10px;
+        top: 10px;
+        padding: 8px 12px;
+        font-size: 18px;
     }
 
     .post-content {
