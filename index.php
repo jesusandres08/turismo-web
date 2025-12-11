@@ -24,7 +24,10 @@
             <!-- 1. Slider Superior -->
             <?php get_template_part( 'template-parts/slider-hero' ); ?>
 
-            <!-- 2. Video Player Card -->
+            <!-- 2. Noticias -->
+            <?php get_template_part( 'template-parts/noticias-home' ); ?>
+
+            <!-- 3. Video Player Card -->
             <?php get_template_part( 'template-parts/videos-home' ); ?>
 
         <?php else : ?>

@@ -68,16 +68,16 @@
             </div>
         </div>
 
-        <!-- Menú Principal con Wrapper -->
+        <!-- MenÃº Principal con Wrapper -->
         <div class="menu-wrapper">
-            <nav class="main-navigation" role="navigation" aria-label="<?php esc_attr_e( 'Menú principal', 'turismo-custom' ); ?>">
+            <nav class="main-navigation" role="navigation" aria-label="<?php esc_attr_e( 'MenÃº principal', 'turismo-custom' ); ?>">
 
-                <!-- Botón Menú Móvil -->
-                <button id="menu-btn" aria-label="Abrir menú" aria-expanded="false">
+                <!-- BotÃ³n MenÃº MÃ³vil -->
+                <button id="menu-btn" aria-label="Abrir menÃº" aria-expanded="false">
                     <i class="fas fa-bars"></i>
                 </button>
 
-                <!-- Menú Desktop -->
+                <!-- MenÃº Desktop -->
                 <?php
                 if ( has_nav_menu( 'primary' ) ) {
                     wp_nav_menu( array(
@@ -90,35 +90,38 @@
                     echo '<ul class="nav-menu">';
                     echo '<li><a href="' . esc_url( home_url( '/' ) ) . '"><i class="fas fa-home"></i> Inicio</a></li>';
                     echo '<li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>';
-                    echo '<li><a href="#"><i class="fas fa-images"></i> Galerías</a></li>';
+                    echo '<li><a href="#"><i class="fas fa-images"></i> GalerÃ­as</a></li>';
                     echo '<li><a href="#"><i class="fas fa-newspaper"></i> Noticias</a></li>';
                     echo '<li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>';
                     echo '</ul>';
                 }
                 ?>
 
-                <!-- Menú Móvil -->
-                <div id="mobile-menu">
-                    <?php
-                    if ( has_nav_menu( 'primary' ) ) {
-                        wp_nav_menu( array(
-                            'theme_location' => 'primary',
-                            'menu_class'     => 'nav-menu',
-                            'container'      => false,
-                            'fallback_cb'    => false,
-                        ));
-                    } else {
-                        echo '<ul class="nav-menu">';
-                        echo '<li><a href="' . esc_url( home_url( '/' ) ) . '"><i class="fas fa-home"></i> Inicio</a></li>';
-                        echo '<li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>';
-                        echo '<li><a href="#"><i class="fas fa-images"></i> Galerías</a></li>';
-                        echo '<li><a href="#"><i class="fas fa-newspaper"></i> Noticias</a></li>';
-                        echo '<li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>';
-                        echo '</ul>';
-                    }
-                    ?>
-                </div>
-
             </nav>
         </div>
     </header>
+
+    <!-- MenÃº MÃ³vil Lateral -->
+    <div id="mobile-menu">
+        <?php
+        if ( has_nav_menu( 'primary' ) ) {
+            wp_nav_menu( array(
+                'theme_location' => 'primary',
+                'menu_class'     => 'nav-menu',
+                'container'      => false,
+                'fallback_cb'    => false,
+            ));
+        } else {
+            echo '<ul class="nav-menu">';
+            echo '<li><a href="' . esc_url( home_url( '/' ) ) . '"><i class="fas fa-home"></i> Inicio</a></li>';
+            echo '<li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>';
+            echo '<li><a href="#"><i class="fas fa-images"></i> GalerÃ­as</a></li>';
+            echo '<li><a href="#"><i class="fas fa-newspaper"></i> Noticias</a></li>';
+            echo '<li><a href="#"><i class="fas fa-envelope"></i> Contacto</a></li>';
+            echo '</ul>';
+        }
+        ?>
+    </div>
+
+    <!-- Overlay del menÃº mÃ³vil -->
+    <div class="menu-overlay"></div>

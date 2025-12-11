@@ -24,8 +24,9 @@
     function initMobileMenu() {
         const menuBtn = document.getElementById('menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
+        const menuOverlay = document.querySelector('.menu-overlay');
 
-        if (menuBtn && mobileMenu) {
+        if (menuBtn && mobileMenu && menuOverlay) {
             menuBtn.addEventListener('click', function(e) {
                 e.preventDefault();
 
@@ -34,12 +35,16 @@
 
                 if (isActive) {
                     mobileMenu.classList.remove('active');
+                    menuOverlay.classList.remove('active');
                     menuBtn.setAttribute('aria-expanded', 'false');
                     menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                    document.body.style.overflow = '';
                 } else {
                     mobileMenu.classList.add('active');
+                    menuOverlay.classList.add('active');
                     menuBtn.setAttribute('aria-expanded', 'true');
                     menuBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    document.body.style.overflow = 'hidden';
                 }
             });
 
@@ -48,20 +53,20 @@
             navLinks.forEach(link => {
                 link.addEventListener('click', function() {
                     mobileMenu.classList.remove('active');
+                    menuOverlay.classList.remove('active');
                     menuBtn.setAttribute('aria-expanded', 'false');
                     menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                    document.body.style.overflow = '';
                 });
             });
 
-            // Cerrar menú al hacer clic fuera
-            document.addEventListener('click', function(e) {
-                if (!menuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
-                    if (mobileMenu.classList.contains('active')) {
-                        mobileMenu.classList.remove('active');
-                        menuBtn.setAttribute('aria-expanded', 'false');
-                        menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-                    }
-                }
+            // Cerrar menú al hacer clic en el overlay
+            menuOverlay.addEventListener('click', function() {
+                mobileMenu.classList.remove('active');
+                menuOverlay.classList.remove('active');
+                menuBtn.setAttribute('aria-expanded', 'false');
+                menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                document.body.style.overflow = '';
             });
         }
     }
@@ -566,6 +571,84 @@
     console.log('%cDesarrollado con ❤️ para ofrecer la mejor experiencia', 'color: #666; font-style: italic;');
 
 })();
+
+/**
+ * Función para copiar enlace al portapapeles
+ * Función global accesible desde HTML
+ */
+function copyToClipboard(url) {
+    // Método moderno usando Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() {
+            showCopyFeedback('¡Enlace copiado!', true);
+        }).catch(function(err) {
+            console.error('Error al copiar:', err);
+            fallbackCopyToClipboard(url);
+        });
+    } else {
+        // Fallback para navegadores antiguos
+        fallbackCopyToClipboard(url);
+    }
+}
+
+/**
+ * Método fallback para copiar al portapapeles
+ */
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.width = '2em';
+    textArea.style.height = '2em';
+    textArea.style.padding = '0';
+    textArea.style.border = 'none';
+    textArea.style.outline = 'none';
+    textArea.style.boxShadow = 'none';
+    textArea.style.background = 'transparent';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        const successful = document.execCommand('copy');
+        showCopyFeedback(successful ? '¡Enlace copiado!' : 'Error al copiar', successful);
+    } catch (err) {
+        console.error('Error al copiar:', err);
+        showCopyFeedback('Error al copiar', false);
+    }
+
+    document.body.removeChild(textArea);
+}
+
+/**
+ * Mostrar feedback visual al copiar
+ */
+function showCopyFeedback(message, success) {
+    // Crear elemento de feedback
+    const feedback = document.createElement('div');
+    feedback.className = 'copy-feedback' + (success ? ' success' : ' error');
+    feedback.innerHTML = `
+        <i class="fas fa-${success ? 'check' : 'times'}-circle"></i>
+        <span>${message}</span>
+    `;
+
+    document.body.appendChild(feedback);
+
+    // Animar entrada
+    setTimeout(() => {
+        feedback.classList.add('show');
+    }, 10);
+
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        feedback.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(feedback);
+        }, 300);
+    }, 3000);
+}
 
 /**
  * Funciones globales para el modal de video

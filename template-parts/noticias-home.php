@@ -50,7 +50,7 @@ $noticias_query = new WP_Query( $noticias_args );
                             <?php if ( has_post_thumbnail() ) : ?>
                                 <?php the_post_thumbnail( 'medium_large', array( 'class' => 'noticia-img' ) ); ?>
                             <?php else : ?>
-                                <img src="<?php echo esc_url( TURISMO_URI . '/images/placeholder.jpg' ); ?>"
+                                <img src="<?php echo esc_url( TURISMO_URI . '/images/placeholder.svg' ); ?>"
                                      alt="<?php the_title_attribute(); ?>"
                                      class="noticia-img">
                             <?php endif; ?>
