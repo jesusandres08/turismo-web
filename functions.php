@@ -109,7 +109,17 @@ function turismo_widgets_init() {
         'before_title'  => '<h3 class="widget-title">',
         'after_title'   => '</h3>',
     ));
-    
+
+    register_sidebar( array(
+        'name'          => __( 'Sidebar Noticias', 'turismo-custom' ),
+        'id'            => 'noticias-sidebar',
+        'description'   => __( 'Sidebar para la sección de noticias en home', 'turismo-custom' ),
+        'before_widget' => '<div id="%1$s" class="sidebar-widget widget %2$s">',
+        'after_widget'  => '</div>',
+        'before_title'  => '<h4>',
+        'after_title'   => '</h4>',
+    ));
+
     register_sidebar( array(
         'name'          => __( 'Sidebar Footer', 'turismo-custom' ),
         'id'            => 'footer-sidebar',
@@ -468,3 +478,80 @@ function turismo_wp_nav_menu_args($args) {
     return $args;
 }
 add_filter('wp_nav_menu_args', 'turismo_wp_nav_menu_args');
+
+/**
+ * AJAX para paginación de noticias
+ */
+function turismo_load_noticias() {
+    $paged = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
+
+    $noticias_args = array(
+        'post_type'      => 'post',
+        'posts_per_page' => 5,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'post__not_in'   => array(),
+        'paged'          => $paged,
+    );
+
+    $noticias_query = new WP_Query($noticias_args);
+
+    ob_start();
+
+    if ($noticias_query->have_posts()) {
+        while ($noticias_query->have_posts()) {
+            $noticias_query->the_post();
+            ?>
+            <article class="noticia-card noticia-card-vertical">
+                <a href="<?php the_permalink(); ?>" class="noticia-link">
+                    <div class="noticia-imagen noticia-imagen-vertical">
+                        <?php if (has_post_thumbnail()) : ?>
+                            <?php the_post_thumbnail('thumbnail', array('class' => 'noticia-img noticia-img-vertical')); ?>
+                        <?php else : ?>
+                            <img src="<?php echo esc_url(TURISMO_URI . '/images/placeholder.svg'); ?>"
+                                 alt="<?php the_title_attribute(); ?>"
+                                 class="noticia-img noticia-img-vertical">
+                        <?php endif; ?>
+                        <?php $categories = get_the_category(); if (!empty($categories)) : $category = $categories[0]; ?>
+                            <span class="noticia-categoria">
+                                <?php echo esc_html($category->name); ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="noticia-contenido noticia-contenido-vertical">
+                        <div class="noticia-meta">
+                            <span class="noticia-fecha">
+                                <i class="far fa-calendar"></i>
+                                <?php echo get_the_date('j M, Y'); ?>
+                            </span>
+                            <span class="noticia-autor">
+                                <i class="far fa-user"></i>
+                                <?php echo get_the_author(); ?>
+                            </span>
+                        </div>
+                        <h3 class="noticia-titulo">
+                            <?php the_title(); ?>
+                        </h3>
+                        <p class="noticia-extracto">
+                            <?php echo wp_trim_words(get_the_excerpt(), 12, '...'); ?>
+                            <span class="noticia-leer-mas">Leer más <i class="fas fa-arrow-right"></i></span>
+                        </p>
+                    </div>
+                </a>
+            </article>
+            <?php
+        }
+    }
+
+    $html = ob_get_clean();
+
+    wp_send_json_success(array(
+        'html' => $html,
+        'max_pages' => $noticias_query->max_num_pages,
+        'current_page' => $paged,
+    ));
+
+    wp_reset_postdata();
+}
+add_action('wp_ajax_load_noticias', 'turismo_load_noticias');
+add_action('wp_ajax_nopriv_load_noticias', 'turismo_load_noticias');

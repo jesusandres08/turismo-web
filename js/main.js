@@ -490,6 +490,118 @@
     }
 
     /**
+     * Paginación AJAX para noticias
+     */
+    function initNoticiasPagination() {
+        const noticiasList = document.getElementById('noticias-lista');
+        const prevBtn = document.querySelector('.noticias-prev');
+        const nextBtn = document.querySelector('.noticias-next');
+
+        if (!noticiasList || !prevBtn || !nextBtn) return;
+
+        let currentPage = parseInt(noticiasList.dataset.currentPage) || 1;
+        let maxPages = parseInt(noticiasList.dataset.maxPages) || 1;
+        let isLoading = false;
+
+        function updateButtons() {
+            if (currentPage <= 1) {
+                prevBtn.classList.add('disabled');
+                prevBtn.disabled = true;
+            } else {
+                prevBtn.classList.remove('disabled');
+                prevBtn.disabled = false;
+            }
+
+            if (currentPage >= maxPages) {
+                nextBtn.classList.add('disabled');
+                nextBtn.disabled = true;
+            } else {
+                nextBtn.classList.remove('disabled');
+                nextBtn.disabled = false;
+            }
+        }
+
+        function loadNoticias(page) {
+            if (isLoading) return;
+
+            isLoading = true;
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+
+            // Agregar clase de carga
+            noticiasList.style.opacity = '0.5';
+
+            jQuery.ajax({
+                url: turismoData.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'load_noticias',
+                    paged: page
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Actualizar contenido
+                        noticiasList.innerHTML = response.data.html;
+
+                        // Actualizar página actual
+                        currentPage = response.data.current_page;
+                        maxPages = response.data.max_pages;
+
+                        // Actualizar data attributes
+                        noticiasList.dataset.currentPage = currentPage;
+                        noticiasList.dataset.maxPages = maxPages;
+
+                        // Actualizar botones
+                        updateButtons();
+
+                        // Restaurar opacidad
+                        noticiasList.style.opacity = '1';
+
+                        // Scroll suave a la sección de noticias
+                        const noticiasSection = document.querySelector('.noticias-home-section');
+                        if (noticiasSection) {
+                            const headerHeight = document.querySelector('.site-header')?.offsetHeight || 0;
+                            const targetPosition = noticiasSection.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+
+                            window.scrollTo({
+                                top: targetPosition,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                },
+                error: function() {
+                    console.error('Error al cargar noticias');
+                    noticiasList.style.opacity = '1';
+                },
+                complete: function() {
+                    isLoading = false;
+                }
+            });
+        }
+
+        // Event listeners
+        prevBtn.addEventListener('click', function() {
+            if (currentPage > 1) {
+                loadNoticias(currentPage - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', function() {
+            if (currentPage < maxPages) {
+                loadNoticias(currentPage + 1);
+            }
+        });
+
+        console.log('✅ Paginación de noticias inicializada');
+    }
+
+    // Inicializar paginación de noticias si existe
+    if (document.getElementById('noticias-lista')) {
+        initNoticiasPagination();
+    }
+
+    /**
      * Galería de Videos - Reproductor con Playlist
      */
     function initVideoGallery() {

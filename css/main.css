@@ -1,3 +1,64 @@
+/* Layout de Noticias + Sidebar */
+.noticias-sidebar-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+}
+.noticias-col-principal {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.noticias-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+}
+.sidebar-widget {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,63,135,0.06);
+    padding: 24px 18px;
+    margin-bottom: 24px;
+}
+.sidebar-widget h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #003F87;
+}
+/* PAGINACIÓN NOTICIAS HOME */
+.noticias-paginacion {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 18px 0 0 0;
+}
+.noticias-pagina-btn {
+    background: #f7f7f7;
+    border: 1px solid #d1d5db;
+    color: #888;
+    font-size: 14px;
+    font-family: inherit;
+    padding: 6px 18px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    outline: none;
+    min-width: 110px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.noticias-pagina-btn:not(.disabled):hover {
+    background: #e5e7eb;
+    color: #003F87;
+}
+.noticias-pagina-btn.disabled,
+.noticias-pagina-btn:disabled {
+    background: #f7f7f7;
+    color: #bbb;
+    border: 1px solid #e5e7eb;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 /* ==========================================
    ESTILOS PRINCIPALES - TURISMO CUSTOM
    Basado en portal_choix
@@ -1439,6 +1500,35 @@ label {
     padding: 0 50px;
 }
 
+.noticias-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.noticias-home-section .section-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.noticias-home-section .section-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+}
+
+.noticias-home-section .section-line {
+    flex: 1;
+    height: 3px;
+    background: linear-gradient(to right, var(--color-secondary), transparent);
+    border-radius: 2px;
+}
+
 .noticias-header {
     display: flex;
     justify-content: space-between;
@@ -1511,52 +1601,74 @@ label {
 }
 
 /* Grid de Noticias */
-.noticias-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
+
+.noticias-lista-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 600px;
+    margin-left: 0;
+    margin-right: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    transition: opacity 0.3s ease;
 }
 
 /* Card de Noticia */
-.noticia-card {
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 63, 135, 0.08);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+.noticia-card-vertical {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: stretch;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 63, 135, 0.08);
+    transition: all 0.3s ease;
+    min-height: 95px;
+    max-height: 95px;
+    padding: 0;
+    margin-left: 0;
+    height: 95px;
 }
 
 .noticia-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 50px rgba(0, 63, 135, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 63, 135, 0.12);
 }
 
 .noticia-link {
     text-decoration: none;
     color: inherit;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    width: 100%;
     height: 100%;
 }
 
 /* Imagen */
-.noticia-imagen {
+
+.noticia-imagen-vertical {
     position: relative;
-    width: 100%;
-    height: 220px;
+    width: 100px;
+    min-width: 100px;
+    height: 100%;
     overflow: hidden;
     background: var(--color-bg-lighter);
+    border-radius: 10px 0 0 10px;
+    margin-right: 0;
+    display: flex;
+    align-items: stretch;
 }
 
-.noticia-img {
+
+.noticia-img-vertical {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 10px 0 0 10px;
+    transition: transform 0.4s;
+    display: block;
 }
 
 .noticia-card:hover .noticia-img {
@@ -1565,32 +1677,35 @@ label {
 
 .noticia-categoria {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 8px;
+    left: 8px;
     background: linear-gradient(135deg, var(--color-secondary-light), var(--color-secondary-hover));
     color: var(--color-primary);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 8px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(242, 195, 0, 0.4);
+    box-shadow: 0 1px 3px rgba(242, 195, 0, 0.18);
 }
 
 /* Contenido */
-.noticia-contenido {
-    padding: 25px;
+
+.noticia-contenido-vertical {
+    padding: 10px 12px 10px 10px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     flex: 1;
+    min-width: 0;
 }
 
 .noticia-meta {
     display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-    font-size: 12px;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 10px;
     color: var(--color-text-light);
 }
 
@@ -1605,15 +1720,13 @@ label {
 }
 
 .noticia-titulo {
-    font-size: 20px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--color-primary);
-    margin: 0 0 12px 0;
+    margin: 0 0 4px 0;
     line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    display: block;
+    overflow: visible;
     transition: color 0.3s ease;
 }
 
@@ -1622,15 +1735,27 @@ label {
 }
 
 .noticia-extracto {
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 11px;
+    line-height: 1.4;
     color: var(--color-text-medium);
-    margin: 0 0 20px 0;
+    margin: 0;
     flex: 1;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    display: inline;
+    overflow: visible;
+}
+
+.noticia-leer-mas {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
 }
 
 .noticia-leer-mas {
