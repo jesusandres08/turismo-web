@@ -156,29 +156,48 @@ function turismo_template_url() {
 }
 
 /**
- * 5. Comentarios personalizados
+ * 5. Comentarios personalizados - Diseño moderno
  */
-function turismo_comment( $comment, $args, $depth ) {
+function turismo_custom_comment( $comment, $args, $depth ) {
     $GLOBALS['comment'] = $comment;
     ?>
     <li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
-        <div id="comment-<?php comment_ID(); ?>" class="comment">
-            <div class="comment-author">
-                <?php echo get_avatar( $comment, 32 ); ?>
-                <strong><?php comment_author_link(); ?></strong> -
-                <em><?php comment_date( 'd/m/Y' ); ?></em>
+        <article id="comment-<?php comment_ID(); ?>" class="comment-body">
+            <div class="comment-avatar">
+                <?php echo get_avatar( $comment, 50 ); ?>
             </div>
-            <div class="comment-content">
-                <?php comment_text(); ?>
+            <div class="comment-content-wrapper">
+                <div class="comment-meta">
+                    <div class="comment-author-name">
+                        <?php comment_author_link(); ?>
+                        <?php if ( $comment->user_id === get_post()->post_author ) : ?>
+                            <span class="author-badge"><i class="fas fa-user-check"></i> Autor</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="comment-metadata">
+                        <i class="far fa-clock"></i>
+                        <time datetime="<?php comment_time( 'c' ); ?>">
+                            <?php printf( '%s a las %s', get_comment_date( 'd/m/Y' ), get_comment_time() ); ?>
+                        </time>
+                    </div>
+                </div>
+
+                <div class="comment-content">
+                    <?php comment_text(); ?>
+                </div>
+
+                <div class="comment-actions">
+                    <?php
+                    comment_reply_link( array_merge( $args, array(
+                        'depth'      => $depth,
+                        'max_depth'  => $args['max_depth'],
+                        'reply_text' => '<i class="fas fa-reply"></i> Responder',
+                    )));
+                    ?>
+                    <?php edit_comment_link( '<i class="fas fa-edit"></i> Editar' ); ?>
+                </div>
             </div>
-            <?php
-            comment_reply_link( array_merge( $args, array(
-                'depth'      => $depth,
-                'max_depth'  => $args['max_depth'],
-                'reply_text' => __( 'Responder', 'turismo-custom' )
-            )));
-            ?>
-        </div>
+        </article>
     <?php
 }
 
@@ -533,9 +552,9 @@ function turismo_load_noticias() {
                             <?php the_title(); ?>
                         </h3>
                         <p class="noticia-extracto">
-                            <?php echo wp_trim_words(get_the_excerpt(), 12, '...'); ?>
-                            <span class="noticia-leer-mas">Leer más <i class="fas fa-arrow-right"></i></span>
+                            <?php echo wp_trim_words(get_the_excerpt(), 14, '...'); ?>
                         </p>
+                        <span class="noticia-leer-mas">Leer más <i class="fas fa-arrow-right"></i></span>
                     </div>
                 </a>
             </article>
@@ -555,3 +574,677 @@ function turismo_load_noticias() {
 }
 add_action('wp_ajax_load_noticias', 'turismo_load_noticias');
 add_action('wp_ajax_nopriv_load_noticias', 'turismo_load_noticias');
+
+/**
+ * 14. Custom Post Type: Hoteles
+ */
+function turismo_register_hoteles_cpt() {
+    $labels = array(
+        'name'               => 'Hoteles',
+        'singular_name'      => 'Hotel',
+        'menu_name'          => 'Hoteles',
+        'add_new'            => 'Añadir Hotel',
+        'add_new_item'       => 'Añadir Nuevo Hotel',
+        'edit_item'          => 'Editar Hotel',
+        'new_item'           => 'Nuevo Hotel',
+        'view_item'          => 'Ver Hotel',
+        'search_items'       => 'Buscar Hoteles',
+        'not_found'          => 'No se encontraron hoteles',
+        'not_found_in_trash' => 'No hay hoteles en la papelera',
+    );
+
+    $args = array(
+        'labels'              => $labels,
+        'public'              => true,
+        'has_archive'         => true,
+        'publicly_queryable'  => true,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'query_var'           => true,
+        'rewrite'             => array( 'slug' => 'hoteles' ),
+        'capability_type'     => 'post',
+        'hierarchical'        => false,
+        'menu_position'       => 5,
+        'menu_icon'           => 'dashicons-building',
+        'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'show_in_rest'        => true,
+        'taxonomies'          => array( 'ubicacion-hotel', 'categoria-hotel' ),
+    );
+
+    register_post_type( 'hotel', $args );
+}
+add_action( 'init', 'turismo_register_hoteles_cpt' );
+
+/**
+ * 15. Taxonomías: Ubicación y Categoría de Hotel
+ */
+function turismo_register_hotel_taxonomies() {
+    // Taxonomía: Ubicación
+    $ubicacion_labels = array(
+        'name'              => 'Ubicaciones',
+        'singular_name'     => 'Ubicación',
+        'search_items'      => 'Buscar Ubicaciones',
+        'all_items'         => 'Todas las Ubicaciones',
+        'parent_item'       => 'Ubicación Padre',
+        'parent_item_colon' => 'Ubicación Padre:',
+        'edit_item'         => 'Editar Ubicación',
+        'update_item'       => 'Actualizar Ubicación',
+        'add_new_item'      => 'Añadir Nueva Ubicación',
+        'new_item_name'     => 'Nuevo Nombre de Ubicación',
+        'menu_name'         => 'Ubicaciones',
+    );
+
+    $ubicacion_args = array(
+        'hierarchical'      => true,
+        'labels'            => $ubicacion_labels,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'query_var'         => true,
+        'rewrite'           => array( 'slug' => 'ubicacion-hotel' ),
+        'show_in_rest'      => true,
+    );
+
+    register_taxonomy( 'ubicacion-hotel', array( 'hotel' ), $ubicacion_args );
+
+    // Taxonomía: Categoría de Hotel
+    $categoria_labels = array(
+        'name'              => 'Categorías de Hotel',
+        'singular_name'     => 'Categoría',
+        'search_items'      => 'Buscar Categorías',
+        'all_items'         => 'Todas las Categorías',
+        'parent_item'       => 'Categoría Padre',
+        'parent_item_colon' => 'Categoría Padre:',
+        'edit_item'         => 'Editar Categoría',
+        'update_item'       => 'Actualizar Categoría',
+        'add_new_item'      => 'Añadir Nueva Categoría',
+        'new_item_name'     => 'Nuevo Nombre de Categoría',
+        'menu_name'         => 'Categorías',
+    );
+
+    $categoria_args = array(
+        'hierarchical'      => true,
+        'labels'            => $categoria_labels,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'query_var'         => true,
+        'rewrite'           => array( 'slug' => 'categoria-hotel' ),
+        'show_in_rest'      => true,
+    );
+
+    register_taxonomy( 'categoria-hotel', array( 'hotel' ), $categoria_args );
+}
+add_action( 'init', 'turismo_register_hotel_taxonomies' );
+
+/**
+ * 16. Meta Boxes para Hoteles
+ */
+function turismo_add_hotel_meta_boxes() {
+    add_meta_box(
+        'turismo_hotel_details',
+        'Detalles del Hotel',
+        'turismo_hotel_details_callback',
+        'hotel',
+        'normal',
+        'high'
+    );
+}
+add_action( 'add_meta_boxes', 'turismo_add_hotel_meta_boxes' );
+
+function turismo_hotel_details_callback( $post ) {
+    wp_nonce_field( 'turismo_save_hotel_details', 'turismo_hotel_nonce' );
+
+    $precio = get_post_meta( $post->ID, '_hotel_precio', true );
+    $estrellas = get_post_meta( $post->ID, '_hotel_estrellas', true );
+    $servicios = get_post_meta( $post->ID, '_hotel_servicios', true );
+    $telefono = get_post_meta( $post->ID, '_hotel_telefono', true );
+    $email = get_post_meta( $post->ID, '_hotel_email', true );
+    $sitio_web = get_post_meta( $post->ID, '_hotel_sitio_web', true );
+    $direccion = get_post_meta( $post->ID, '_hotel_direccion', true );
+    $galeria = get_post_meta( $post->ID, '_hotel_galeria', true );
+
+    ?>
+    <style>
+        .hotel-meta-field { margin-bottom: 20px; }
+        .hotel-meta-field label { display: block; font-weight: 600; margin-bottom: 5px; }
+        .hotel-meta-field input[type="text"],
+        .hotel-meta-field input[type="email"],
+        .hotel-meta-field input[type="url"],
+        .hotel-meta-field input[type="number"],
+        .hotel-meta-field textarea,
+        .hotel-meta-field select { width: 100%; padding: 8px; }
+        .hotel-meta-field textarea { min-height: 100px; }
+        .hotel-servicios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .hotel-servicios-grid label { display: flex; align-items: center; gap: 5px; font-weight: normal; }
+    </style>
+
+    <div class="hotel-meta-field">
+        <label for="hotel_precio">Precio por noche (opcional):</label>
+        <input type="text" id="hotel_precio" name="hotel_precio" value="<?php echo esc_attr( $precio ); ?>" placeholder="Ej: $150">
+        <small style="color: #666;">Ejemplo: $150, $200-$300, Consultar, etc.</small>
+    </div>
+
+    <div class="hotel-meta-field">
+        <label for="hotel_estrellas">Calificación (estrellas):</label>
+        <select id="hotel_estrellas" name="hotel_estrellas">
+            <option value="">Sin calificación</option>
+            <option value="1" <?php selected( $estrellas, '1' ); ?>>1 Estrella</option>
+            <option value="2" <?php selected( $estrellas, '2' ); ?>>2 Estrellas</option>
+            <option value="3" <?php selected( $estrellas, '3' ); ?>>3 Estrellas</option>
+            <option value="4" <?php selected( $estrellas, '4' ); ?>>4 Estrellas</option>
+            <option value="5" <?php selected( $estrellas, '5' ); ?>>5 Estrellas</option>
+        </select>
+    </div>
+
+    <div class="hotel-meta-field">
+        <label>Servicios disponibles:</label>
+        <div class="hotel-servicios-grid">
+            <?php
+            $servicios_disponibles = array(
+                'wifi' => 'WiFi Gratis',
+                'estacionamiento' => 'Estacionamiento',
+                'piscina' => 'Piscina',
+                'restaurante' => 'Restaurante',
+                'gimnasio' => 'Gimnasio',
+                'spa' => 'Spa',
+                'aire_acondicionado' => 'Aire Acondicionado',
+                'bar' => 'Bar',
+                'recepcion_24h' => 'Recepción 24h',
+                'desayuno' => 'Desayuno incluido',
+                'pet_friendly' => 'Mascotas permitidas',
+                'servicio_habitacion' => 'Servicio a la habitación',
+            );
+
+            $servicios_seleccionados = $servicios ? json_decode( $servicios, true ) : array();
+
+            foreach ( $servicios_disponibles as $key => $label ) {
+                $checked = in_array( $key, (array) $servicios_seleccionados ) ? 'checked' : '';
+                echo '<label><input type="checkbox" name="hotel_servicios[]" value="' . esc_attr( $key ) . '" ' . $checked . '> ' . esc_html( $label ) . '</label>';
+            }
+            ?>
+        </div>
+    </div>
+
+    <div class="hotel-meta-field">
+        <label for="hotel_telefono">Teléfono:</label>
+        <input type="text" id="hotel_telefono" name="hotel_telefono" value="<?php echo esc_attr( $telefono ); ?>" placeholder="Ej: +52 123 456 7890">
+    </div>
+
+    <div class="hotel-meta-field">
+        <label for="hotel_email">Email:</label>
+        <input type="email" id="hotel_email" name="hotel_email" value="<?php echo esc_attr( $email ); ?>" placeholder="info@hotel.com">
+    </div>
+
+    <div class="hotel-meta-field">
+        <label for="hotel_sitio_web">Sitio Web:</label>
+        <input type="url" id="hotel_sitio_web" name="hotel_sitio_web" value="<?php echo esc_attr( $sitio_web ); ?>" placeholder="https://www.hotel.com">
+    </div>
+
+    <div class="hotel-meta-field">
+        <label for="hotel_direccion">Dirección completa:</label>
+        <textarea id="hotel_direccion" name="hotel_direccion" placeholder="Calle, número, colonia, ciudad, estado"><?php echo esc_textarea( $direccion ); ?></textarea>
+    </div>
+
+    <div class="hotel-meta-field">
+        <label for="hotel_galeria">Galería de imágenes (URLs separadas por comas):</label>
+        <textarea id="hotel_galeria" name="hotel_galeria" placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"><?php echo esc_textarea( $galeria ); ?></textarea>
+        <small style="color: #666;">Ingresa las URLs de las imágenes separadas por comas. Puedes subir imágenes a la biblioteca de medios y copiar sus URLs.</small>
+    </div>
+    <?php
+}
+
+function turismo_save_hotel_meta( $post_id ) {
+    if ( ! isset( $_POST['turismo_hotel_nonce'] ) ) {
+        return;
+    }
+
+    if ( ! wp_verify_nonce( $_POST['turismo_hotel_nonce'], 'turismo_save_hotel_details' ) ) {
+        return;
+    }
+
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+        return;
+    }
+
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+
+    // Guardar precio
+    if ( isset( $_POST['hotel_precio'] ) ) {
+        update_post_meta( $post_id, '_hotel_precio', sanitize_text_field( $_POST['hotel_precio'] ) );
+    }
+
+    // Guardar estrellas
+    if ( isset( $_POST['hotel_estrellas'] ) ) {
+        update_post_meta( $post_id, '_hotel_estrellas', sanitize_text_field( $_POST['hotel_estrellas'] ) );
+    }
+
+    // Guardar servicios
+    if ( isset( $_POST['hotel_servicios'] ) ) {
+        $servicios = array_map( 'sanitize_text_field', $_POST['hotel_servicios'] );
+        update_post_meta( $post_id, '_hotel_servicios', json_encode( $servicios ) );
+    } else {
+        update_post_meta( $post_id, '_hotel_servicios', json_encode( array() ) );
+    }
+
+    // Guardar teléfono
+    if ( isset( $_POST['hotel_telefono'] ) ) {
+        update_post_meta( $post_id, '_hotel_telefono', sanitize_text_field( $_POST['hotel_telefono'] ) );
+    }
+
+    // Guardar email
+    if ( isset( $_POST['hotel_email'] ) ) {
+        update_post_meta( $post_id, '_hotel_email', sanitize_email( $_POST['hotel_email'] ) );
+    }
+
+    // Guardar sitio web
+    if ( isset( $_POST['hotel_sitio_web'] ) ) {
+        update_post_meta( $post_id, '_hotel_sitio_web', esc_url_raw( $_POST['hotel_sitio_web'] ) );
+    }
+
+    // Guardar dirección
+    if ( isset( $_POST['hotel_direccion'] ) ) {
+        update_post_meta( $post_id, '_hotel_direccion', sanitize_textarea_field( $_POST['hotel_direccion'] ) );
+    }
+
+    // Guardar galería
+    if ( isset( $_POST['hotel_galeria'] ) ) {
+        update_post_meta( $post_id, '_hotel_galeria', sanitize_textarea_field( $_POST['hotel_galeria'] ) );
+    }
+}
+add_action( 'save_post', 'turismo_save_hotel_meta' );
+
+/**
+ * 17. Custom Post Type: Restaurantes
+ */
+function turismo_register_restaurantes_cpt() {
+    $labels = array(
+        'name'               => 'Restaurantes',
+        'singular_name'      => 'Restaurante',
+        'menu_name'          => 'Restaurantes',
+        'add_new'            => 'Añadir Restaurante',
+        'add_new_item'       => 'Añadir Nuevo Restaurante',
+        'edit_item'          => 'Editar Restaurante',
+        'new_item'           => 'Nuevo Restaurante',
+        'view_item'          => 'Ver Restaurante',
+        'search_items'       => 'Buscar Restaurantes',
+        'not_found'          => 'No se encontraron restaurantes',
+        'not_found_in_trash' => 'No hay restaurantes en la papelera',
+    );
+
+    $args = array(
+        'labels'              => $labels,
+        'public'              => true,
+        'has_archive'         => true,
+        'publicly_queryable'  => true,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'query_var'           => true,
+        'rewrite'             => array( 'slug' => 'restaurantes' ),
+        'capability_type'     => 'post',
+        'hierarchical'        => false,
+        'menu_position'       => 5,
+        'menu_icon'           => 'dashicons-food',
+        'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'show_in_rest'        => true,
+        'taxonomies'          => array( 'ubicacion-restaurante', 'tipo-cocina' ),
+    );
+
+    register_post_type( 'restaurante', $args );
+}
+add_action( 'init', 'turismo_register_restaurantes_cpt' );
+
+/**
+ * 18. Taxonomías: Ubicación y Tipo de Cocina para Restaurantes
+ */
+function turismo_register_restaurante_taxonomies() {
+    // Taxonomía: Ubicación
+    $ubicacion_labels = array(
+        'name'              => 'Ubicaciones',
+        'singular_name'     => 'Ubicación',
+        'search_items'      => 'Buscar Ubicaciones',
+        'all_items'         => 'Todas las Ubicaciones',
+        'parent_item'       => 'Ubicación Padre',
+        'parent_item_colon' => 'Ubicación Padre:',
+        'edit_item'         => 'Editar Ubicación',
+        'update_item'       => 'Actualizar Ubicación',
+        'add_new_item'      => 'Añadir Nueva Ubicación',
+        'new_item_name'     => 'Nuevo Nombre de Ubicación',
+        'menu_name'         => 'Ubicaciones',
+    );
+
+    $ubicacion_args = array(
+        'hierarchical'      => true,
+        'labels'            => $ubicacion_labels,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'query_var'         => true,
+        'rewrite'           => array( 'slug' => 'ubicacion-restaurante' ),
+        'show_in_rest'      => true,
+    );
+
+    register_taxonomy( 'ubicacion-restaurante', array( 'restaurante' ), $ubicacion_args );
+
+    // Taxonomía: Tipo de Cocina
+    $cocina_labels = array(
+        'name'              => 'Tipos de Cocina',
+        'singular_name'     => 'Tipo de Cocina',
+        'search_items'      => 'Buscar Tipos',
+        'all_items'         => 'Todos los Tipos',
+        'parent_item'       => 'Tipo Padre',
+        'parent_item_colon' => 'Tipo Padre:',
+        'edit_item'         => 'Editar Tipo',
+        'update_item'       => 'Actualizar Tipo',
+        'add_new_item'      => 'Añadir Nuevo Tipo',
+        'new_item_name'     => 'Nuevo Tipo de Cocina',
+        'menu_name'         => 'Tipos de Cocina',
+    );
+
+    $cocina_args = array(
+        'hierarchical'      => true,
+        'labels'            => $cocina_labels,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'query_var'         => true,
+        'rewrite'           => array( 'slug' => 'tipo-cocina' ),
+        'show_in_rest'      => true,
+    );
+
+    register_taxonomy( 'tipo-cocina', array( 'restaurante' ), $cocina_args );
+}
+add_action( 'init', 'turismo_register_restaurante_taxonomies' );
+
+/**
+ * 19. Meta Boxes para Restaurantes
+ */
+function turismo_add_restaurante_meta_boxes() {
+    add_meta_box(
+        'turismo_restaurante_details',
+        'Detalles del Restaurante',
+        'turismo_restaurante_details_callback',
+        'restaurante',
+        'normal',
+        'high'
+    );
+}
+add_action( 'add_meta_boxes', 'turismo_add_restaurante_meta_boxes' );
+
+function turismo_restaurante_details_callback( $post ) {
+    wp_nonce_field( 'turismo_save_restaurante_details', 'turismo_restaurante_nonce' );
+
+    $rango_precio = get_post_meta( $post->ID, '_restaurante_rango_precio', true );
+    $calificacion = get_post_meta( $post->ID, '_restaurante_calificacion', true );
+    $horario = get_post_meta( $post->ID, '_restaurante_horario', true );
+    $telefono = get_post_meta( $post->ID, '_restaurante_telefono', true );
+    $email = get_post_meta( $post->ID, '_restaurante_email', true );
+    $sitio_web = get_post_meta( $post->ID, '_restaurante_sitio_web', true );
+    $direccion = get_post_meta( $post->ID, '_restaurante_direccion', true );
+    $menu_url = get_post_meta( $post->ID, '_restaurante_menu_url', true );
+    $galeria = get_post_meta( $post->ID, '_restaurante_galeria', true );
+    $especialidades = get_post_meta( $post->ID, '_restaurante_especialidades', true );
+    $servicios = get_post_meta( $post->ID, '_restaurante_servicios', true );
+
+    ?>
+    <style>
+        .restaurante-meta-field { margin-bottom: 20px; }
+        .restaurante-meta-field label { display: block; font-weight: 600; margin-bottom: 5px; }
+        .restaurante-meta-field input[type="text"],
+        .restaurante-meta-field input[type="email"],
+        .restaurante-meta-field input[type="url"],
+        .restaurante-meta-field textarea,
+        .restaurante-meta-field select { width: 100%; padding: 8px; }
+        .restaurante-meta-field textarea { min-height: 100px; }
+        .restaurante-servicios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .restaurante-servicios-grid label { display: flex; align-items: center; gap: 5px; font-weight: normal; }
+    </style>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_rango_precio">Rango de Precio:</label>
+        <select id="restaurante_rango_precio" name="restaurante_rango_precio">
+            <option value="">Seleccionar</option>
+            <option value="$" <?php selected( $rango_precio, '$' ); ?>>$ - Económico</option>
+            <option value="$$" <?php selected( $rango_precio, '$$' ); ?>>$$ - Moderado</option>
+            <option value="$$$" <?php selected( $rango_precio, '$$$' ); ?>>$$$ - Costoso</option>
+            <option value="$$$$" <?php selected( $rango_precio, '$$$$' ); ?>>$$$$ - Muy costoso</option>
+        </select>
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_calificacion">Calificación (estrellas):</label>
+        <select id="restaurante_calificacion" name="restaurante_calificacion">
+            <option value="">Sin calificación</option>
+            <option value="1" <?php selected( $calificacion, '1' ); ?>>1 Estrella</option>
+            <option value="2" <?php selected( $calificacion, '2' ); ?>>2 Estrellas</option>
+            <option value="3" <?php selected( $calificacion, '3' ); ?>>3 Estrellas</option>
+            <option value="4" <?php selected( $calificacion, '4' ); ?>>4 Estrellas</option>
+            <option value="5" <?php selected( $calificacion, '5' ); ?>>5 Estrellas</option>
+        </select>
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_horario">Horario:</label>
+        <textarea id="restaurante_horario" name="restaurante_horario" placeholder="Ej: Lun-Dom: 12:00 PM - 11:00 PM"><?php echo esc_textarea( $horario ); ?></textarea>
+        <small style="color: #666;">Describe el horario de atención del restaurante</small>
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label>Servicios disponibles:</label>
+        <div class="restaurante-servicios-grid">
+            <?php
+            $servicios_disponibles = array(
+                'wifi' => 'WiFi Gratis',
+                'estacionamiento' => 'Estacionamiento',
+                'terraza' => 'Terraza',
+                'bar' => 'Bar',
+                'delivery' => 'Servicio a domicilio',
+                'reservaciones' => 'Acepta reservaciones',
+                'aire_acondicionado' => 'Aire Acondicionado',
+                'musica_vivo' => 'Música en vivo',
+                'pet_friendly' => 'Mascotas permitidas',
+                'eventos_privados' => 'Eventos privados',
+                'buffet' => 'Buffet',
+                'desayuno' => 'Desayuno',
+            );
+
+            $servicios_seleccionados = $servicios ? json_decode( $servicios, true ) : array();
+
+            foreach ( $servicios_disponibles as $key => $label ) {
+                $checked = in_array( $key, (array) $servicios_seleccionados ) ? 'checked' : '';
+                echo '<label><input type="checkbox" name="restaurante_servicios[]" value="' . esc_attr( $key ) . '" ' . $checked . '> ' . esc_html( $label ) . '</label>';
+            }
+            ?>
+        </div>
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_especialidades">Especialidades del chef:</label>
+        <textarea id="restaurante_especialidades" name="restaurante_especialidades" placeholder="Ej: Mole poblano, Tacos al pastor, etc."><?php echo esc_textarea( $especialidades ); ?></textarea>
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_telefono">Teléfono:</label>
+        <input type="text" id="restaurante_telefono" name="restaurante_telefono" value="<?php echo esc_attr( $telefono ); ?>" placeholder="Ej: +52 123 456 7890">
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_email">Email:</label>
+        <input type="email" id="restaurante_email" name="restaurante_email" value="<?php echo esc_attr( $email ); ?>" placeholder="info@restaurante.com">
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_sitio_web">Sitio Web:</label>
+        <input type="url" id="restaurante_sitio_web" name="restaurante_sitio_web" value="<?php echo esc_attr( $sitio_web ); ?>" placeholder="https://www.restaurante.com">
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_direccion">Dirección completa:</label>
+        <textarea id="restaurante_direccion" name="restaurante_direccion" placeholder="Calle, número, colonia, ciudad, estado"><?php echo esc_textarea( $direccion ); ?></textarea>
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_menu_url">URL del Menú (PDF o imagen):</label>
+        <input type="url" id="restaurante_menu_url" name="restaurante_menu_url" value="<?php echo esc_attr( $menu_url ); ?>" placeholder="https://ejemplo.com/menu.pdf">
+        <small style="color: #666;">Sube el menú a la biblioteca de medios y copia su URL aquí</small>
+    </div>
+
+    <div class="restaurante-meta-field">
+        <label for="restaurante_galeria">Galería de imágenes (URLs separadas por comas):</label>
+        <textarea id="restaurante_galeria" name="restaurante_galeria" placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"><?php echo esc_textarea( $galeria ); ?></textarea>
+        <small style="color: #666;">Ingresa las URLs de las imágenes separadas por comas</small>
+    </div>
+    <?php
+}
+
+function turismo_save_restaurante_meta( $post_id ) {
+    if ( ! isset( $_POST['turismo_restaurante_nonce'] ) ) {
+        return;
+    }
+
+    if ( ! wp_verify_nonce( $_POST['turismo_restaurante_nonce'], 'turismo_save_restaurante_details' ) ) {
+        return;
+    }
+
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+        return;
+    }
+
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+
+    // Guardar rango de precio
+    if ( isset( $_POST['restaurante_rango_precio'] ) ) {
+        update_post_meta( $post_id, '_restaurante_rango_precio', sanitize_text_field( $_POST['restaurante_rango_precio'] ) );
+    }
+
+    // Guardar calificación
+    if ( isset( $_POST['restaurante_calificacion'] ) ) {
+        update_post_meta( $post_id, '_restaurante_calificacion', sanitize_text_field( $_POST['restaurante_calificacion'] ) );
+    }
+
+    // Guardar horario
+    if ( isset( $_POST['restaurante_horario'] ) ) {
+        update_post_meta( $post_id, '_restaurante_horario', sanitize_textarea_field( $_POST['restaurante_horario'] ) );
+    }
+
+    // Guardar servicios
+    if ( isset( $_POST['restaurante_servicios'] ) ) {
+        $servicios = array_map( 'sanitize_text_field', $_POST['restaurante_servicios'] );
+        update_post_meta( $post_id, '_restaurante_servicios', json_encode( $servicios ) );
+    } else {
+        update_post_meta( $post_id, '_restaurante_servicios', json_encode( array() ) );
+    }
+
+    // Guardar especialidades
+    if ( isset( $_POST['restaurante_especialidades'] ) ) {
+        update_post_meta( $post_id, '_restaurante_especialidades', sanitize_textarea_field( $_POST['restaurante_especialidades'] ) );
+    }
+
+    // Guardar teléfono
+    if ( isset( $_POST['restaurante_telefono'] ) ) {
+        update_post_meta( $post_id, '_restaurante_telefono', sanitize_text_field( $_POST['restaurante_telefono'] ) );
+    }
+
+    // Guardar email
+    if ( isset( $_POST['restaurante_email'] ) ) {
+        update_post_meta( $post_id, '_restaurante_email', sanitize_email( $_POST['restaurante_email'] ) );
+    }
+
+    // Guardar sitio web
+    if ( isset( $_POST['restaurante_sitio_web'] ) ) {
+        update_post_meta( $post_id, '_restaurante_sitio_web', esc_url_raw( $_POST['restaurante_sitio_web'] ) );
+    }
+
+    // Guardar dirección
+    if ( isset( $_POST['restaurante_direccion'] ) ) {
+        update_post_meta( $post_id, '_restaurante_direccion', sanitize_textarea_field( $_POST['restaurante_direccion'] ) );
+    }
+
+    // Guardar menú URL
+    if ( isset( $_POST['restaurante_menu_url'] ) ) {
+        update_post_meta( $post_id, '_restaurante_menu_url', esc_url_raw( $_POST['restaurante_menu_url'] ) );
+    }
+
+    // Guardar galería
+    if ( isset( $_POST['restaurante_galeria'] ) ) {
+        update_post_meta( $post_id, '_restaurante_galeria', sanitize_textarea_field( $_POST['restaurante_galeria'] ) );
+    }
+}
+add_action( 'save_post', 'turismo_save_restaurante_meta' );
+
+/**
+ * 20. Navegación de posts mejorada con imágenes
+ */
+function turismo_post_navigation_with_images() {
+    $prev_post = get_previous_post();
+    $next_post = get_next_post();
+
+    if (!$prev_post && !$next_post) {
+        return;
+    }
+    ?>
+    <nav class="post-navigation-modern">
+        <div class="post-nav-container">
+
+            <?php if ($prev_post) : ?>
+                <div class="post-nav-item post-nav-prev">
+                    <a href="<?php echo get_permalink($prev_post); ?>" class="post-nav-link">
+                        <div class="post-nav-image">
+                            <?php if (has_post_thumbnail($prev_post)) : ?>
+                                <?php echo get_the_post_thumbnail($prev_post, 'medium'); ?>
+                            <?php else : ?>
+                                <div class="post-nav-no-image">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="post-nav-content">
+                            <span class="post-nav-label">
+                                <i class="fas fa-arrow-left"></i>
+                                Anterior
+                            </span>
+                            <h4 class="post-nav-title"><?php echo get_the_title($prev_post); ?></h4>
+                            <span class="post-nav-date">
+                                <i class="far fa-calendar"></i>
+                                <?php echo get_the_date('d M, Y', $prev_post); ?>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            <?php else : ?>
+                <div class="post-nav-item post-nav-prev post-nav-empty"></div>
+            <?php endif; ?>
+
+            <?php if ($next_post) : ?>
+                <div class="post-nav-item post-nav-next">
+                    <a href="<?php echo get_permalink($next_post); ?>" class="post-nav-link">
+                        <div class="post-nav-content">
+                            <span class="post-nav-label">
+                                Siguiente
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                            <h4 class="post-nav-title"><?php echo get_the_title($next_post); ?></h4>
+                            <span class="post-nav-date">
+                                <i class="far fa-calendar"></i>
+                                <?php echo get_the_date('d M, Y', $next_post); ?>
+                            </span>
+                        </div>
+                        <div class="post-nav-image">
+                            <?php if (has_post_thumbnail($next_post)) : ?>
+                                <?php echo get_the_post_thumbnail($next_post, 'medium'); ?>
+                            <?php else : ?>
+                                <div class="post-nav-no-image">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                </div>
+            <?php else : ?>
+                <div class="post-nav-item post-nav-next post-nav-empty"></div>
+            <?php endif; ?>
+
+        </div>
+    </nav>
+    <?php
+}

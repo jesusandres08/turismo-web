@@ -65,9 +65,9 @@ $noticias_query = new WP_Query( $noticias_args );
                                         <?php the_title(); ?>
                                     </h3>
                                     <p class="noticia-extracto">
-                                        <?php echo wp_trim_words( get_the_excerpt(), 12, '...' ); ?>
-                                        <span class="noticia-leer-mas">Leer más <i class="fas fa-arrow-right"></i></span>
+                                        <?php echo wp_trim_words( get_the_excerpt(), 14, '...' ); ?>
                                     </p>
+                                    <span class="noticia-leer-mas">Leer más <i class="fas fa-arrow-right"></i></span>
                                 </div>
                             </a>
                         </article>

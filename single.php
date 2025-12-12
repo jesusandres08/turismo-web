@@ -151,11 +151,8 @@ get_header();
                 </article><!-- #post-<?php the_ID(); ?> -->
 
                 <?php
-                // Navegación entre posts
-                the_post_navigation( array(
-                    'prev_text' => '<span class="nav-subtitle"><i class="fas fa-arrow-left"></i> ' . __( 'Anterior', 'turismo-custom' ) . '</span><span class="nav-title">%title</span>',
-                    'next_text' => '<span class="nav-subtitle">' . __( 'Siguiente', 'turismo-custom' ) . ' <i class="fas fa-arrow-right"></i></span><span class="nav-title">%title</span>',
-                ));
+                // Navegación entre posts con imágenes
+                turismo_post_navigation_with_images();
 
                 // Comentarios
                 if ( comments_open() || get_comments_number() ) :
