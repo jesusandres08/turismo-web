@@ -342,22 +342,34 @@
     });
 
     /**
-     * Slider 2 Hero - Autoplay con controles
+     * Slider Destinos - Autoplay con controles
      */
-    function initSlider2() {
-        const track = document.querySelector('.slider2-track');
-        const slides = document.querySelectorAll('.slider2-slide');
-        const prevBtn = document.querySelector('.slider2-arrow.prev');
-        const nextBtn = document.querySelector('.slider2-arrow.next');
-        const dots = document.querySelectorAll('.slider2-dot');
+    function initSliderDestinos() {
+        console.log('🔍 Buscando slider destinos...');
 
-        if (!track || slides.length === 0) return;
+        const track = document.querySelector('.slider-destinos-track');
+        const slides = document.querySelectorAll('.slider-destinos-slide');
+        const prevBtn = document.querySelector('.slider-destinos-arrow.prev');
+        const nextBtn = document.querySelector('.slider-destinos-arrow.next');
+        const dots = document.querySelectorAll('.slider-destinos-dot');
+
+        console.log('Track:', track);
+        console.log('Slides:', slides.length);
+        console.log('Prev button:', prevBtn);
+        console.log('Next button:', nextBtn);
+        console.log('Dots:', dots.length);
+
+        if (!track || slides.length === 0) {
+            console.warn('⚠️ No se encontró el slider destinos o no hay slides');
+            return;
+        }
 
         let currentIndex = 0;
         let autoplayInterval;
         const autoplayDelay = 5000; // 5 segundos
 
         function goToSlide(index) {
+            console.log('📍 Ir al slide:', index);
             currentIndex = index;
             const offset = -currentIndex * 100;
             track.style.transform = `translateX(${offset}%)`;
@@ -375,26 +387,36 @@
         }
 
         function nextSlide() {
+            console.log('➡️ Siguiente slide');
             currentIndex = (currentIndex + 1) % slides.length;
             goToSlide(currentIndex);
         }
 
         function prevSlide() {
+            console.log('⬅️ Slide anterior');
             currentIndex = (currentIndex - 1 + slides.length) % slides.length;
             goToSlide(currentIndex);
         }
 
         function startAutoplay() {
+            console.log('▶️ Iniciando autoplay');
+            stopAutoplay(); // Clear any existing interval
             autoplayInterval = setInterval(nextSlide, autoplayDelay);
         }
 
         function stopAutoplay() {
-            clearInterval(autoplayInterval);
+            if (autoplayInterval) {
+                console.log('⏸️ Deteniendo autoplay');
+                clearInterval(autoplayInterval);
+                autoplayInterval = null;
+            }
         }
 
         // Event listeners para botones
         if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🖱️ Click en botón prev');
                 stopAutoplay();
                 prevSlide();
                 startAutoplay();
@@ -402,7 +424,9 @@
         }
 
         if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🖱️ Click en botón next');
                 stopAutoplay();
                 nextSlide();
                 startAutoplay();
@@ -411,7 +435,9 @@
 
         // Event listeners para dots
         dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
+            dot.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🖱️ Click en dot:', index);
                 stopAutoplay();
                 goToSlide(index);
                 startAutoplay();
@@ -419,10 +445,16 @@
         });
 
         // Pausar autoplay en hover
-        const sliderWrapper = document.querySelector('.slider2-wrapper');
+        const sliderWrapper = document.querySelector('.slider-destinos-wrapper');
         if (sliderWrapper) {
-            sliderWrapper.addEventListener('mouseenter', stopAutoplay);
-            sliderWrapper.addEventListener('mouseleave', startAutoplay);
+            sliderWrapper.addEventListener('mouseenter', () => {
+                console.log('🖱️ Mouse enter - pausar');
+                stopAutoplay();
+            });
+            sliderWrapper.addEventListener('mouseleave', () => {
+                console.log('🖱️ Mouse leave - reanudar');
+                startAutoplay();
+            });
         }
 
         // Soporte para teclado (accesibilidad)
@@ -435,10 +467,12 @@
 
             if (isVisible) {
                 if (e.key === 'ArrowLeft') {
+                    console.log('⌨️ Tecla Arrow Left');
                     stopAutoplay();
                     prevSlide();
                     startAutoplay();
                 } else if (e.key === 'ArrowRight') {
+                    console.log('⌨️ Tecla Arrow Right');
                     stopAutoplay();
                     nextSlide();
                     startAutoplay();
@@ -466,6 +500,7 @@
             const diff = touchStartX - touchEndX;
 
             if (Math.abs(diff) > swipeThreshold) {
+                console.log('👆 Swipe detectado');
                 stopAutoplay();
                 if (diff > 0) {
                     // Swipe left - next slide
@@ -481,12 +516,19 @@
         // Iniciar autoplay
         startAutoplay();
 
-        console.log('✅ Slider2 inicializado con', slides.length, 'slides');
+        console.log('✅ Slider Destinos inicializado correctamente con', slides.length, 'destinos');
     }
 
-    // Inicializar slider si existe
-    if (document.querySelector('.slider2-section')) {
-        initSlider2();
+    // Inicializar slider destinos si existe
+    console.log('🔎 Verificando si existe slider destinos...');
+    const sliderSection = document.querySelector('.slider-destinos-section');
+    console.log('Slider section encontrado:', sliderSection);
+
+    if (sliderSection) {
+        console.log('✅ Slider section existe, inicializando...');
+        initSliderDestinos();
+    } else {
+        console.warn('⚠️ No se encontró .slider-destinos-section en el DOM');
     }
 
     /**

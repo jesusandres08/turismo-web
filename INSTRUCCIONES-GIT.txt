@@ -1,0 +1,432 @@
+================================================================================
+GUÍA COMPLETA DE GIT: LOCAL Y REMOTO
+================================================================================
+
+📋 ÍNDICE:
+1. CONFIGURACIÓN INICIAL
+2. TRABAJAR EN LOCAL (tu computadora)
+3. CONECTAR CON REPOSITORIO REMOTO (GitHub, GitLab, etc.)
+4. ENVIAR CAMBIOS AL REMOTO (push)
+5. DESCARGAR CAMBIOS DEL REMOTO (pull)
+6. FLUJO DE TRABAJO DIARIO
+7. COMANDOS ÚTILES
+
+================================================================================
+1. CONFIGURACIÓN INICIAL (SOLO UNA VEZ)
+================================================================================
+
+Configurar tu nombre y correo (Git los usa en cada commit):
+
+   git config --global user.name "Tu Nombre"
+   git config --global user.email "tu@email.com"
+
+Verificar configuración:
+   git config --list
+
+================================================================================
+2. TRABAJAR EN LOCAL (TU COMPUTADORA)
+================================================================================
+
+▶ OPCIÓN A: CREAR UN NUEVO REPOSITORIO LOCAL
+
+1. Ve a la carpeta de tu proyecto:
+   cd ruta/a/tu/proyecto
+
+2. Inicializa Git:
+   git init
+
+3. Esto crea una carpeta .git oculta que guarda todo el historial.
+
+
+▶ OPCIÓN B: CLONAR UN REPOSITORIO EXISTENTE
+
+Si ya existe un repositorio remoto:
+   git clone [URL-DEL-REPOSITORIO]
+
+Ejemplo:
+   git clone https://github.com/usuario/turismo-web.git
+
+
+▶ FLUJO DE TRABAJO LOCAL (día a día):
+
+1. Ver qué archivos cambiaron:
+   git status
+
+2. Agregar archivos al área de preparación (stage):
+   git add nombre-archivo.php          (un archivo específico)
+   git add .                            (todos los archivos)
+   git add *.css                        (todos los archivos CSS)
+
+3. Guardar los cambios (hacer un commit):
+   git commit -m "Descripción clara de qué cambios hiciste"
+
+   Ejemplo:
+   git commit -m "Agregué slider de restaurantes en homepage"
+
+4. Ver el historial de commits:
+   git log
+   git log --oneline                    (versión compacta)
+
+5. Ver diferencias antes de hacer commit:
+   git diff                             (cambios no añadidos)
+   git diff --staged                    (cambios ya añadidos con git add)
+
+
+▶ DESHACER CAMBIOS LOCALES:
+
+Deshacer cambios en un archivo (antes de hacer add):
+   git checkout -- nombre-archivo.php
+
+Quitar archivo del área de preparación (deshacer git add):
+   git reset nombre-archivo.php
+
+Deshacer el último commit (mantener cambios):
+   git reset --soft HEAD~1
+
+Deshacer el último commit (eliminar cambios):
+   git reset --hard HEAD~1
+
+================================================================================
+3. CONECTAR CON REPOSITORIO REMOTO
+================================================================================
+
+📥 TRAER CAMBIOS: DESDE GIT (REMOTO) → HACIA TU COMPUTADORA (LOCAL)
+📤 ENVIAR CAMBIOS: DESDE TU COMPUTADORA (LOCAL) → HACIA GIT (REMOTO)
+
+NO NECESITAS BORRAR LA CARPETA Y CLONAR DE NUEVO.
+Git está diseñado para actualizar tu código sin perder tu trabajo local.
+
+▶ VERIFICAR QUE TENGAS CONFIGURADO EL REMOTE:
+
+1. Verifica los remotes configurados:
+   git remote -v
+
+2. Si NO aparece nada, necesitas agregar el remote:
+   git remote add origin [URL-DE-TU-REPOSITORIO]
+
+   Ejemplo:
+   git remote add origin https://github.com/tu-usuario/turismo-web.git
+
+3. Verifica que se agregó correctamente:
+   git remote -v
+
+   Deberías ver algo como:
+   origin  https://github.com/tu-usuario/turismo-web.git (fetch)
+   origin  https://github.com/tu-usuario/turismo-web.git (push)
+
+4. Si agregaste el remote incorrecto, puedes cambiarlo:
+   git remote set-url origin [NUEVA-URL]
+
+5. Para eliminar un remote:
+   git remote remove origin
+
+================================================================================
+4. ENVIAR CAMBIOS AL REMOTO (PUSH)
+================================================================================
+
+📤 SUBIR CAMBIOS: DESDE TU COMPUTADORA (LOCAL) → HACIA GIT (REMOTO)
+
+▶ FLUJO COMPLETO PARA ENVIAR CAMBIOS:
+
+1. Asegúrate de tener commits locales:
+   git status
+   git log --oneline
+
+2. Envía tus commits al repositorio remoto:
+   git push origin main
+
+   (Si tu rama principal se llama "master":)
+   git push origin master
+
+3. La primera vez que hagas push en una rama nueva, usa:
+   git push -u origin main
+
+   El flag -u (--set-upstream) configura la rama para futuros push/pull
+
+
+▶ SITUACIONES ESPECIALES:
+
+Si el remoto tiene cambios que tú no tienes (alguien más hizo push):
+   git pull origin main          (descarga y combina cambios)
+   git push origin main          (ahora sí puedes hacer push)
+
+Si quieres forzar el push (⚠️ CUIDADO, sobrescribe el remoto):
+   git push -f origin main
+
+   ⚠️ ADVERTENCIA: Esto borrará los commits que estén en el remoto pero no
+   en tu local. Solo úsalo si estás 100% seguro.
+
+================================================================================
+5. DESCARGAR CAMBIOS DEL REMOTO (PULL)
+================================================================================
+
+📥 TRAER CAMBIOS: DESDE GIT (REMOTO) → HACIA TU COMPUTADORA (LOCAL)
+
+▶ COMANDO BÁSICO:
+
+Ahora que ya tienes configurado el remote, simplemente ejecuta:
+
+   git pull origin main
+
+   (Si tu rama principal se llama "master" en lugar de "main", usa:)
+   git pull origin master
+
+¡Listo! Esto descargará TODOS los cambios del repositorio remoto y los aplicará
+a tu carpeta local automáticamente.
+
+
+▶ QUÉ HACE EL COMANDO "git pull":
+
+git pull = git fetch + git merge
+
+1. FETCH: Descarga los cambios del servidor remoto
+2. MERGE: Combina esos cambios con tu código local
+
+Es decir, con un solo comando descargas Y actualizas tu código local.
+
+
+▶ SI TIENES CAMBIOS LOCALES QUE NO HAS GUARDADO:
+
+Si hiciste cambios en tu código local y quieres conservarlos:
+
+1. Guarda tus cambios temporalmente:
+   git stash
+
+2. Descarga los últimos cambios:
+   git pull origin main
+
+3. Recupera tus cambios guardados:
+   git stash pop
+
+
+▶ SI QUIERES DESCARTAR TUS CAMBIOS LOCALES:
+
+Si modificaste archivos localmente y NO quieres conservar esos cambios:
+
+1. Descarta todos los cambios locales:
+   git reset --hard
+
+2. Descarga los últimos cambios:
+   git pull origin main
+
+⚠️ ADVERTENCIA: Esto borrará TODOS tus cambios locales que no hayas guardado (commit).
+
+
+▶ SOLO DESCARGAR SIN APLICAR (AVANZADO):
+
+Si quieres ver qué cambios hay antes de aplicarlos:
+
+1. Descarga los cambios sin aplicarlos:
+   git fetch origin
+
+2. Compara los cambios:
+   git diff main origin/main
+
+3. Si quieres aplicar los cambios:
+   git merge origin/main
+
+================================================================================
+6. FLUJO DE TRABAJO DIARIO COMPLETO
+================================================================================
+
+Este es el flujo típico cuando trabajas con Git todos los días:
+
+
+▶ OPCIÓN A: EMPEZAR A TRABAJAR (solo tú trabajas en el proyecto)
+
+1. git status                    (ver qué archivos modificaste)
+2. git add .                     (agregar todos los cambios)
+3. git commit -m "Mensaje"       (guardar cambios localmente)
+4. git push origin main          (subir cambios al remoto)
+
+
+▶ OPCIÓN B: TRABAJO EN EQUIPO (varios desarrolladores)
+
+1. git pull origin main          (descargar últimos cambios del equipo)
+2. [Haces tus modificaciones en el código]
+3. git status                    (ver qué archivos modificaste)
+4. git add .                     (agregar todos los cambios)
+5. git commit -m "Mensaje"       (guardar cambios localmente)
+6. git pull origin main          (por si alguien hizo push mientras trabajabas)
+7. git push origin main          (subir tus cambios al remoto)
+
+
+▶ EJEMPLO COMPLETO PASO A PASO:
+
+# Día 1: Configuración inicial
+git clone https://github.com/usuario/turismo-web.git
+cd turismo-web
+
+# Día 2: Trabajar en una nueva funcionalidad
+git pull origin main                              # Descargar últimos cambios
+# [Modificas tus archivos: index.php, style.css, etc.]
+git status                                        # Ver qué archivos cambiaron
+git add .                                         # Agregar todos los cambios
+git commit -m "Agregué slider de hoteles"        # Guardar cambios
+git push origin main                              # Subir al remoto
+
+# Si hay conflictos al hacer push
+git pull origin main                              # Descargar y resolver conflictos
+# [Git te mostrará los archivos con conflictos, ábrelos y resuélvelos]
+git add .                                         # Agregar archivos resueltos
+git commit -m "Resueltos conflictos de merge"    # Guardar la resolución
+git push origin main                              # Subir todo al remoto
+
+================================================================================
+7. COMANDOS ÚTILES
+================================================================================
+
+▶ VER INFORMACIÓN:
+
+Ver el historial de commits:
+   git log
+   git log --oneline                 (versión compacta)
+   git log --graph --oneline         (con gráfico de ramas)
+
+Ver qué archivos han cambiado:
+   git status
+
+Ver las diferencias en tus archivos:
+   git diff                          (cambios sin añadir)
+   git diff --staged                 (cambios ya añadidos)
+   git diff HEAD~1                   (comparar con commit anterior)
+
+Ver configuración actual:
+   git config --list
+
+
+▶ TRABAJAR CON RAMAS (BRANCHES):
+
+Ver las ramas disponibles:
+   git branch                        (ramas locales)
+   git branch -a                     (todas las ramas)
+
+Crear una nueva rama:
+   git branch nombre-rama
+
+Cambiar a otra rama:
+   git checkout nombre-rama
+
+   (Nuevo método en Git moderno:)
+   git switch nombre-rama
+
+Crear y cambiar a una rama nueva:
+   git checkout -b nombre-rama
+
+   (Nuevo método:)
+   git switch -c nombre-rama
+
+Combinar una rama con la actual:
+   git merge nombre-rama
+
+Eliminar una rama local:
+   git branch -d nombre-rama
+
+
+▶ DESHACER Y CORREGIR:
+
+Ver cambios de un commit específico:
+   git show [hash-del-commit]
+
+Revertir un commit (crear un nuevo commit que deshace cambios):
+   git revert [hash-del-commit]
+
+Volver a un commit anterior (⚠️ borra historial posterior):
+   git reset --hard [hash-del-commit]
+
+Modificar el último commit (agregar cambios olvidados):
+   git add archivo-olvidado.php
+   git commit --amend
+
+Guardar cambios temporalmente:
+   git stash                         (guardar cambios)
+   git stash list                    (ver cambios guardados)
+   git stash pop                     (recuperar últimos cambios)
+   git stash apply                   (aplicar sin eliminar del stash)
+   git stash drop                    (eliminar último stash)
+
+
+▶ IGNORAR ARCHIVOS:
+
+Crear archivo .gitignore en la raíz del proyecto:
+   node_modules/
+   .env
+   *.log
+   wp-config.php
+
+Estos archivos/carpetas no serán rastreados por Git.
+
+
+▶ OTROS COMANDOS ÚTILES:
+
+Ver archivos rastreados:
+   git ls-files
+
+Eliminar archivo del repositorio (pero mantenerlo local):
+   git rm --cached nombre-archivo.php
+
+Ver quién modificó cada línea de un archivo:
+   git blame nombre-archivo.php
+
+Buscar en el historial de commits:
+   git log --grep="palabra clave"
+
+Ver commits de un autor específico:
+   git log --author="Nombre"
+
+
+================================================================================
+TIPS Y BUENAS PRÁCTICAS
+================================================================================
+
+✅ Haz commits frecuentes con mensajes descriptivos
+✅ Haz pull antes de empezar a trabajar cada día
+✅ Haz push al final del día para respaldar tu trabajo
+✅ Usa .gitignore para no subir archivos sensibles (contraseñas, configuraciones locales)
+✅ Escribe mensajes de commit en español o inglés, pero sé consistente
+
+❌ No hagas commits enormes con muchos cambios no relacionados
+❌ No uses mensajes genéricos como "cambios" o "update"
+❌ No subas archivos con contraseñas o tokens de API
+❌ No uses git reset --hard sin estar seguro (pierdes cambios permanentemente)
+
+
+================================================================================
+¿CUÁNDO SÍ NECESITARÍAS CLONAR DE NUEVO?
+================================================================================
+
+Solo necesitas borrar y clonar de nuevo en estos casos:
+
+1. Tu repositorio local está completamente corrupto
+2. Quieres empezar desde cero sin ningún cambio local
+3. Cambiaste tantas cosas que es más fácil empezar de nuevo
+
+Para clonar de nuevo:
+1. Borra la carpeta: turismo-web
+2. Clona el repositorio:
+   git clone [URL-DE-TU-REPOSITORIO] turismo-web
+
+
+================================================================================
+RESUMEN RÁPIDO - COMANDOS MÁS USADOS
+================================================================================
+
+Flujo básico diario:
+   git pull origin main             # Descargar cambios
+   [Modificar archivos]
+   git status                       # Ver cambios
+   git add .                        # Agregar todo
+   git commit -m "Mensaje"          # Guardar cambios
+   git push origin main             # Subir al remoto
+
+Configuración inicial:
+   git config --global user.name "Tu Nombre"
+   git config --global user.email "tu@email.com"
+   git remote add origin [URL]
+
+Ver información:
+   git status                       # Ver estado actual
+   git log --oneline                # Ver historial
+   git diff                         # Ver cambios
+
+================================================================================

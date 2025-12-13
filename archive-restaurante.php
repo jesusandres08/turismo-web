@@ -103,27 +103,27 @@ get_header();
 
             <!-- Contador de resultados -->
             <div class="restaurantes-resultados-info">
-                <span id="restaurantes-count">0 hoteles encontrados</span>
+                <span id="restaurantes-count">0 restaurantes encontrados</span>
             </div>
 
             <!-- Grid -->
             <div class="restaurantes-grid" id="restaurantes-grid">
                 <?php
-                $hoteles_args = array(
+                $restaurantes_args = array(
                     'post_type' => 'restaurante',
                     'posts_per_page' => -1,
                     'orderby' => 'date',
                     'order' => 'DESC',
                 );
 
-                $hoteles_query = new WP_Query($hoteles_args);
+                $restaurantes_query = new WP_Query($restaurantes_args);
 
-                if ($hoteles_query->have_posts()) :
-                    while ($hoteles_query->have_posts()) : $hoteles_query->the_post();
+                if ($restaurantes_query->have_posts()) :
+                    while ($restaurantes_query->have_posts()) : $restaurantes_query->the_post();
 
                         // Obtener meta datos
-                        $precio = get_post_meta(get_the_ID(), '_restaurante_precio', true);
-                        $estrellas = get_post_meta(get_the_ID(), '_restaurante_estrellas', true);
+                        $rango_precio = get_post_meta(get_the_ID(), '_restaurante_rango_precio', true);
+                        $calificacion = get_post_meta(get_the_ID(), '_restaurante_calificacion', true);
                         $servicios = get_post_meta(get_the_ID(), '_restaurante_servicios', true);
                         $servicios_array = $servicios ? json_decode($servicios, true) : array();
                         $telefono = get_post_meta(get_the_ID(), '_restaurante_telefono', true);
@@ -142,10 +142,10 @@ get_header();
                         <article class="restaurante-card"
                                  data-ubicacion="<?php echo esc_attr($ubicacion_slug); ?>"
                                  data-categoria="<?php echo esc_attr($categoria_slug); ?>"
-                                 data-estrellas="<?php echo esc_attr($estrellas); ?>"
+                                 data-estrellas="<?php echo esc_attr($calificacion); ?>"
                                  data-nombre="<?php echo esc_attr(strtolower(get_the_title())); ?>">
 
-                            <!-- Imagen del Hotel -->
+                            <!-- Imagen del Restaurante -->
                             <div class="restaurante-card-imagen">
                                 <?php if (has_post_thumbnail()) : ?>
                                     <?php the_post_thumbnail('large', array('class' => 'restaurante-img')); ?>
@@ -186,11 +186,11 @@ get_header();
                                 </div>
 
                                 <!-- Calificación con Estrellas -->
-                                <?php if ($estrellas) : ?>
+                                <?php if ($calificacion) : ?>
                                     <div class="restaurante-calificacion">
                                         <?php
                                         for ($i = 1; $i <= 5; $i++) {
-                                            if ($i <= $estrellas) {
+                                            if ($i <= $calificacion) {
                                                 echo '<i class="fas fa-star"></i>';
                                             } else {
                                                 echo '<i class="far fa-star"></i>';
@@ -239,17 +239,16 @@ get_header();
                                 <!-- Footer con Precio y Botones -->
                                 <div class="restaurante-card-footer">
                                     <div class="restaurante-precio">
-                                        <?php if ($precio) : ?>
-                                            <span class="precio-label">Desde</span>
-                                            <span class="precio-valor"><?php echo esc_html($precio); ?></span>
-                                            <span class="precio-periodo">/ noche</span>
+                                        <?php if ($rango_precio) : ?>
+                                            <span class="precio-label">Rango de precio:</span>
+                                            <span class="precio-valor"><?php echo esc_html($rango_precio); ?></span>
                                         <?php else : ?>
                                             <span class="precio-consultar">Consultar precio</span>
                                         <?php endif; ?>
                                     </div>
 
                                     <div class="restaurante-acciones">
-                                        <a href="<?php the_permalink(); ?>" class="btn-ver-hotel">
+                                        <a href="<?php the_permalink(); ?>" class="btn-ver-restaurante">
                                             Ver detalles
                                             <i class="fas fa-arrow-right"></i>
                                         </a>
@@ -265,8 +264,8 @@ get_header();
                 else : ?>
                     <div class="no-restaurantes-mensaje">
                         <i class="fas fa-utensils"></i>
-                        <h3>No hay hoteles disponibles</h3>
-                        <p>Agrega nuevos hoteles desde el panel de administración.</p>
+                        <h3>No hay restaurantes disponibles</h3>
+                        <p>Agrega nuevos restaurantes desde el panel de administración.</p>
                     </div>
                 <?php endif; ?>
             </div><!-- .restaurantes-grid -->
@@ -274,7 +273,7 @@ get_header();
             <!-- Mensaje sin resultados -->
             <div class="no-resultados-mensaje" id="no-resultados" style="display: none;">
                 <i class="fas fa-search"></i>
-                <h3>No se encontraron hoteles</h3>
+                <h3>No se encontraron restaurantes</h3>
                 <p>Intenta ajustar los filtros para ver más resultados.</p>
             </div>
 
@@ -295,7 +294,7 @@ get_header();
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="galeria-imagen-container">
-                <img id="galeria-imagen-actual" src="" alt="Imagen del hotel">
+                <img id="galeria-imagen-actual" src="" alt="Imagen del restaurante">
             </div>
             <button class="galeria-next" onclick="galeriaSlide(1)">
                 <i class="fas fa-chevron-right"></i>
@@ -314,16 +313,16 @@ let galeriaIndice = 0;
 
 // Filtros y búsqueda
 document.addEventListener('DOMContentLoaded', function() {
-    const hotelesCards = document.querySelectorAll('.restaurante-card');
+    const restaurantesCards = document.querySelectorAll('.restaurante-card');
     const searchInput = document.getElementById('restaurantes-search');
     const filtroUbicacion = document.getElementById('filtro-ubicacion');
     const filtroCategoria = document.getElementById('filtro-categoria');
     const filtroEstrellas = document.getElementById('filtro-estrellas');
     const limpiarBtn = document.getElementById('limpiar-filtros');
-    const hotelesCount = document.getElementById('restaurantes-count');
+    const restaurantesCount = document.getElementById('restaurantes-count');
     const noResultados = document.getElementById('no-resultados');
 
-    function filtrarHoteles() {
+    function filtrarRestaurantes() {
         const searchTerm = searchInput.value.toLowerCase();
         const ubicacionValue = filtroUbicacion.value;
         const categoriaValue = filtroCategoria.value;
@@ -331,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let visibleCount = 0;
 
-        hotelesCards.forEach(card => {
+        restaurantesCards.forEach(card => {
             const nombre = card.getAttribute('data-nombre');
             const ubicacion = card.getAttribute('data-ubicacion');
             const categoria = card.getAttribute('data-categoria');
@@ -372,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Actualizar contador
-        hotelesCount.textContent = visibleCount + (visibleCount === 1 ? ' hotel encontrado' : ' hoteles encontrados');
+        restaurantesCount.textContent = visibleCount + (visibleCount === 1 ? ' restaurante encontrado' : ' restaurantes encontrados');
 
         // Mostrar mensaje si no hay resultados
         if (visibleCount === 0) {
@@ -383,10 +382,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event listeners para filtros
-    searchInput.addEventListener('input', filtrarHoteles);
-    filtroUbicacion.addEventListener('change', filtrarHoteles);
-    filtroCategoria.addEventListener('change', filtrarHoteles);
-    filtroEstrellas.addEventListener('change', filtrarHoteles);
+    searchInput.addEventListener('input', filtrarRestaurantes);
+    filtroUbicacion.addEventListener('change', filtrarRestaurantes);
+    filtroCategoria.addEventListener('change', filtrarRestaurantes);
+    filtroEstrellas.addEventListener('change', filtrarRestaurantes);
 
     // Limpiar filtros
     limpiarBtn.addEventListener('click', function() {
@@ -394,31 +393,31 @@ document.addEventListener('DOMContentLoaded', function() {
         filtroUbicacion.value = '';
         filtroCategoria.value = '';
         filtroEstrellas.value = '';
-        filtrarHoteles();
+        filtrarRestaurantes();
     });
 
     // Inicializar contador
-    filtrarHoteles();
+    filtrarRestaurantes();
 
     // Galería de imágenes
     const galeriaButtons = document.querySelectorAll('.restaurante-galeria-btn');
     galeriaButtons.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            const hotelId = this.getAttribute('data-restaurante-id');
-            openGaleriaModal(hotelId);
+            const restauranteId = this.getAttribute('data-restaurante-id');
+            openGaleriaModal(restauranteId);
         });
     });
 });
 
 // Funciones de galería
-function openGaleriaModal(hotelId) {
-    const hotelCard = document.querySelector(`.restaurante-card[data-restaurante-id="${hotelId}"]`);
+function openGaleriaModal(restauranteId) {
+    const restauranteCard = document.querySelector(`.restaurante-card[data-restaurante-id="${restauranteId}"]`);
     const galeriaData = <?php
     // Crear array de galerías para JavaScript
     $galeria_data = array();
-    $hoteles_query->rewind_posts();
-    while ($hoteles_query->have_posts()) : $hoteles_query->the_post();
+    $restaurantes_query->rewind_posts();
+    while ($restaurantes_query->have_posts()) : $restaurantes_query->the_post();
         $galeria = get_post_meta(get_the_ID(), '_restaurante_galeria', true);
         $galeria_urls = $galeria ? array_map('trim', explode(',', $galeria)) : array();
         if (!empty($galeria_urls)) {
@@ -429,8 +428,8 @@ function openGaleriaModal(hotelId) {
     echo json_encode($galeria_data);
     ?>;
 
-    if (galeriaData[hotelId]) {
-        galeriaActual = galeriaData[hotelId];
+    if (galeriaData[restauranteId]) {
+        galeriaActual = galeriaData[restauranteId];
         galeriaIndice = 0;
         mostrarGaleriaImagen();
         document.getElementById('galeria-modal').classList.add('active');

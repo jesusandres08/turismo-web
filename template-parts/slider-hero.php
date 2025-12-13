@@ -1,41 +1,83 @@
 <?php
 /**
- * Slider Hero - Estilo portal_choix slider2
- * Slider premium con diseño split (60% imagen / 40% info)
+ * Slider Hero - Destinos Turísticos
+ * Slider con diseño split (60% imagen / 40% info)
  */
 
-// Obtener los últimos posts destacados para el slider
+// Obtener destinos turísticos destacados
 $slider_args = array(
-    'post_type'      => 'post',
-    'posts_per_page' => 5, // Número de slides
+    'post_type'      => 'destino',
+    'posts_per_page' => 5,
+    'post_status'    => 'publish',
+    'meta_query'     => array(
+        array(
+            'key'     => '_destino_destacado',
+            'value'   => '1',
+            'compare' => '='
+        )
+    ),
     'orderby'        => 'date',
     'order'          => 'DESC',
-    'post_status'    => 'publish',
 );
 
 $slider_query = new WP_Query( $slider_args );
+
+// Si no hay destinos destacados, mostrar todos los destinos
+if ( ! $slider_query->have_posts() ) {
+    $slider_args = array(
+        'post_type'      => 'destino',
+        'posts_per_page' => 5,
+        'post_status'    => 'publish',
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    );
+    $slider_query = new WP_Query( $slider_args );
+}
+
+// Si aún no hay destinos, mostrar posts normales temporalmente
+if ( ! $slider_query->have_posts() ) {
+    $slider_args = array(
+        'post_type'      => 'post',
+        'posts_per_page' => 5,
+        'post_status'    => 'publish',
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    );
+    $slider_query = new WP_Query( $slider_args );
+}
 
 if ( $slider_query->have_posts() ) :
 ?>
 
 <!-- Slider Section -->
-<section class="slider2-section">
-    <div class="slider2-wrapper">
-        <div class="slider2-track">
+<section class="slider-destinos-section">
+    <div class="slider-destinos-wrapper">
+        <div class="slider-destinos-track">
 
-            <?php while ( $slider_query->have_posts() ) : $slider_query->the_post(); ?>
+            <?php while ( $slider_query->have_posts() ) : $slider_query->the_post();
+                $ubicacion = get_post_meta( get_the_ID(), '_destino_ubicacion', true );
+                $descripcion_corta = get_post_meta( get_the_ID(), '_destino_descripcion_corta', true );
+                $cta_text = get_post_meta( get_the_ID(), '_destino_cta_text', true );
+                $cta_url = get_post_meta( get_the_ID(), '_destino_cta_url', true );
+                $categorias = get_the_terms( get_the_ID(), 'categoria-destino' );
 
-                <div class="slider2-slide">
-                    <a href="<?php the_permalink(); ?>" class="slide-link">
+                // Defaults
+                if ( empty( $cta_text ) ) $cta_text = 'Explorar Destino';
+                if ( empty( $cta_url ) ) $cta_url = get_permalink();
+                if ( empty( $descripcion_corta ) ) $descripcion_corta = wp_trim_words( get_the_excerpt(), 20, '...' );
+            ?>
+
+                <div class="slider-destinos-slide">
+                    <a href="<?php echo esc_url( $cta_url ); ?>" class="slide-link">
 
                         <!-- Imagen del Slide (60%) -->
                         <div class="slide-media">
                             <?php if ( has_post_thumbnail() ) : ?>
-                                <?php the_post_thumbnail( 'full', array( 'alt' => get_the_title() ) ); ?>
+                                <?php the_post_thumbnail( 'large', array( 'alt' => get_the_title() ) ); ?>
                             <?php else : ?>
                                 <!-- Placeholder con gradiente si no hay imagen -->
-                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #003F87, #0067b8); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 800;">
-                                    <i class="fas fa-image" style="font-size: 80px; opacity: 0.3;"></i>
+                                <div class="slide-placeholder">
+                                    <i class="fas fa-image"></i>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -44,66 +86,62 @@ if ( $slider_query->have_posts() ) :
                         <div class="slide-info">
 
                             <!-- Tag/Categoría -->
-                            <?php
-                            $categories = get_the_category();
-                            if ( ! empty( $categories ) ) :
-                            ?>
+                            <?php if ( $categorias && ! is_wp_error( $categorias ) ) : ?>
                                 <span class="slide-tag">
-                                    <i class="fas fa-tag"></i>
-                                    <?php echo esc_html( $categories[0]->name ); ?>
+                                    <i class="fas fa-map-marked-alt"></i>
+                                    <?php echo esc_html( $categorias[0]->name ); ?>
                                 </span>
                             <?php endif; ?>
 
                             <!-- Título -->
                             <h2 class="slide-title"><?php the_title(); ?></h2>
 
-                            <!-- Extracto -->
+                            <!-- Ubicación -->
+                            <?php if ( $ubicacion ) : ?>
+                                <div class="slide-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <?php echo esc_html( $ubicacion ); ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Descripción -->
                             <p class="slide-excerpt">
-                                <?php
-                                if ( has_excerpt() ) {
-                                    echo wp_trim_words( get_the_excerpt(), 20, '...' );
-                                } else {
-                                    echo wp_trim_words( get_the_content(), 20, '...' );
-                                }
-                                ?>
+                                <?php echo esc_html( $descripcion_corta ); ?>
                             </p>
 
-                            <!-- Meta: Fecha y Autor -->
-                            <div class="slide-meta">
-                                <i class="fas fa-calendar-alt"></i>
-                                <?php echo get_the_date( 'd/m/Y' ); ?>
-                                <span class="meta-separator">•</span>
-                                <i class="fas fa-user"></i>
-                                <?php the_author(); ?>
-                            </div>
+                            <!-- Botón de Acción -->
+                            <span class="slide-btn">
+                                <?php echo esc_html( $cta_text ); ?>
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
 
                         </div><!-- .slide-info -->
 
                     </a><!-- .slide-link -->
-                </div><!-- .slider2-slide -->
+                </div><!-- .slider-destinos-slide -->
 
             <?php endwhile; ?>
 
-        </div><!-- .slider2-track -->
+        </div><!-- .slider-destinos-track -->
 
         <!-- Controles de Navegación -->
-        <button class="slider2-arrow prev" aria-label="Slide anterior">
+        <button class="slider-destinos-arrow prev" aria-label="Slide anterior">
             <i class="fas fa-chevron-left"></i>
         </button>
-        <button class="slider2-arrow next" aria-label="Siguiente slide">
+        <button class="slider-destinos-arrow next" aria-label="Siguiente slide">
             <i class="fas fa-chevron-right"></i>
         </button>
 
-    </div><!-- .slider2-wrapper -->
+    </div><!-- .slider-destinos-wrapper -->
 
     <!-- Dots de Navegación -->
-    <div class="slider2-dots" role="tablist" aria-label="Navegación del slider">
+    <div class="slider-destinos-dots" role="tablist" aria-label="Navegación del slider">
         <?php
         $slide_count = $slider_query->post_count;
         for ( $i = 0; $i < $slide_count; $i++ ) :
         ?>
             <button
-                class="slider2-dot <?php echo $i === 0 ? 'active' : ''; ?>"
+                class="slider-destinos-dot <?php echo $i === 0 ? 'active' : ''; ?>"
                 data-slide="<?php echo $i; ?>"
                 role="tab"
                 aria-label="Ir al slide <?php echo $i + 1; ?>"
@@ -112,7 +150,7 @@ if ( $slider_query->have_posts() ) :
         <?php endfor; ?>
     </div>
 
-</section><!-- .slider2-section -->
+</section><!-- .slider-destinos-section -->
 
 <?php
 wp_reset_postdata();

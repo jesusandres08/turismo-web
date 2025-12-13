@@ -8,8 +8,8 @@ get_header();
 while (have_posts()) : the_post();
 
     // Obtener meta datos
-    $precio = get_post_meta(get_the_ID(), '_restaurante_precio', true);
-    $estrellas = get_post_meta(get_the_ID(), '_restaurante_estrellas', true);
+    $rango_precio = get_post_meta(get_the_ID(), '_restaurante_rango_precio', true);
+    $calificacion = get_post_meta(get_the_ID(), '_restaurante_calificacion', true);
     $servicios = get_post_meta(get_the_ID(), '_restaurante_servicios', true);
     $servicios_array = $servicios ? json_decode($servicios, true) : array();
     $telefono = get_post_meta(get_the_ID(), '_restaurante_telefono', true);
@@ -27,7 +27,7 @@ while (have_posts()) : the_post();
 
     <main class="site-main single-restaurante-page">
 
-        <!-- Hero del Hotel -->
+        <!-- Hero del Restaurante -->
         <section class="single-restaurante-hero">
             <?php if (has_post_thumbnail()) : ?>
                 <?php the_post_thumbnail('full', array('class' => 'single-restaurante-hero-img')); ?>
@@ -44,7 +44,7 @@ while (have_posts()) : the_post();
                             <i class="fas fa-home"></i> Inicio
                         </a>
                         <span class="separator">/</span>
-                        <a href="<?php echo get_permalink(get_page_by_path('hoteles')); ?>">Hoteles</a>
+                        <a href="<?php echo get_post_type_archive_link('restaurante'); ?>">Restaurantes</a>
                         <span class="separator">/</span>
                         <span><?php the_title(); ?></span>
                     </div>
@@ -59,10 +59,10 @@ while (have_posts()) : the_post();
                             </span>
                         <?php endif; ?>
 
-                        <?php if ($estrellas) : ?>
+                        <?php if ($calificacion) : ?>
                             <span class="restaurante-meta-item restaurante-stars">
                                 <?php for ($i = 1; $i <= 5; $i++) {
-                                    echo $i <= $estrellas ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                                    echo $i <= $calificacion ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
                                 } ?>
                             </span>
                         <?php endif; ?>
@@ -109,7 +109,7 @@ while (have_posts()) : the_post();
                     <section class="restaurante-descripcion-section">
                         <h2 class="section-titulo">
                             <i class="fas fa-info-circle"></i>
-                            Acerca de este hotel
+                            Acerca de este restaurante
                         </h2>
                         <div class="restaurante-descripcion-content">
                             <?php the_content(); ?>
@@ -162,17 +162,16 @@ while (have_posts()) : the_post();
 
                     <!-- Card de Reserva -->
                     <div class="reserva-card">
-                        <?php if ($precio) : ?>
+                        <?php if ($rango_precio) : ?>
                             <div class="reserva-precio">
-                                <span class="precio-desde">Desde</span>
-                                <span class="precio-cantidad"><?php echo esc_html($precio); ?></span>
-                                <span class="precio-periodo">/ noche</span>
+                                <span class="precio-desde">Rango de precio</span>
+                                <span class="precio-cantidad"><?php echo esc_html($rango_precio); ?></span>
                             </div>
                         <?php endif; ?>
 
                         <a href="#contacto" class="btn-reservar">
-                            <i class="fas fa-calendar-check"></i>
-                            Reservar Ahora
+                            <i class="fas fa-utensils"></i>
+                            Reservar Mesa
                         </a>
 
                         <?php if ($sitio_web) : ?>
@@ -234,9 +233,9 @@ while (have_posts()) : the_post();
                     <?php endif; ?>
 
                     <!-- Botón Volver -->
-                    <a href="<?php echo get_permalink(get_page_by_path('hoteles')); ?>" class="btn-volver">
+                    <a href="<?php echo get_post_type_archive_link('restaurante'); ?>" class="btn-volver">
                         <i class="fas fa-arrow-left"></i>
-                        Ver todos los hoteles
+                        Ver todos los restaurantes
                     </a>
 
                 </aside><!-- .single-restaurante-sidebar -->
@@ -273,7 +272,7 @@ while (have_posts()) : the_post();
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <div class="galeria-imagen-container">
-                    <img id="galeria-imagen-actual" src="" alt="Imagen del hotel">
+                    <img id="galeria-imagen-actual" src="" alt="Imagen del restaurante">
                 </div>
                 <button class="galeria-next" onclick="galeriaSlide(1)">
                     <i class="fas fa-chevron-right"></i>

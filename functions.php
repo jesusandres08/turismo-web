@@ -1248,3 +1248,200 @@ function turismo_post_navigation_with_images() {
     </nav>
     <?php
 }
+
+/**
+ * 20. Custom Post Type: Destinos Turísticos
+ */
+function turismo_register_destinos_cpt() {
+    $labels = array(
+        'name'               => 'Destinos Turísticos',
+        'singular_name'      => 'Destino',
+        'menu_name'          => 'Destinos',
+        'add_new'            => 'Añadir Destino',
+        'add_new_item'       => 'Añadir Nuevo Destino',
+        'edit_item'          => 'Editar Destino',
+        'new_item'           => 'Nuevo Destino',
+        'view_item'          => 'Ver Destino',
+        'search_items'       => 'Buscar Destinos',
+        'not_found'          => 'No se encontraron destinos',
+        'not_found_in_trash' => 'No hay destinos en la papelera',
+    );
+
+    $args = array(
+        'labels'              => $labels,
+        'public'              => true,
+        'has_archive'         => true,
+        'publicly_queryable'  => true,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'query_var'           => true,
+        'rewrite'             => array( 'slug' => 'destinos' ),
+        'capability_type'     => 'post',
+        'hierarchical'        => false,
+        'menu_position'       => 5,
+        'menu_icon'           => 'dashicons-palmtree',
+        'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'show_in_rest'        => true,
+        'taxonomies'          => array( 'categoria-destino' ),
+    );
+
+    register_post_type( 'destino', $args );
+}
+add_action( 'init', 'turismo_register_destinos_cpt' );
+
+/**
+ * 21. Taxonomía: Categorías de Destinos
+ */
+function turismo_register_destino_taxonomies() {
+    $labels = array(
+        'name'              => 'Categorías de Destinos',
+        'singular_name'     => 'Categoría',
+        'search_items'      => 'Buscar Categorías',
+        'all_items'         => 'Todas las Categorías',
+        'parent_item'       => 'Categoría Padre',
+        'parent_item_colon' => 'Categoría Padre:',
+        'edit_item'         => 'Editar Categoría',
+        'update_item'       => 'Actualizar Categoría',
+        'add_new_item'      => 'Añadir Nueva Categoría',
+        'new_item_name'     => 'Nuevo Nombre de Categoría',
+        'menu_name'         => 'Categorías',
+    );
+
+    $args = array(
+        'hierarchical'      => true,
+        'labels'            => $labels,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'query_var'         => true,
+        'rewrite'           => array( 'slug' => 'categoria-destino' ),
+        'show_in_rest'      => true,
+    );
+
+    register_taxonomy( 'categoria-destino', array( 'destino' ), $args );
+}
+add_action( 'init', 'turismo_register_destino_taxonomies' );
+
+/**
+ * 22. Meta Boxes para Destinos Turísticos
+ */
+function turismo_add_destino_meta_boxes() {
+    add_meta_box(
+        'turismo_destino_details',
+        'Detalles del Destino',
+        'turismo_destino_details_callback',
+        'destino',
+        'normal',
+        'high'
+    );
+}
+add_action( 'add_meta_boxes', 'turismo_add_destino_meta_boxes' );
+
+function turismo_destino_details_callback( $post ) {
+    wp_nonce_field( 'turismo_save_destino_details', 'turismo_destino_nonce' );
+
+    $ubicacion = get_post_meta( $post->ID, '_destino_ubicacion', true );
+    $destacado = get_post_meta( $post->ID, '_destino_destacado', true );
+    $descripcion_corta = get_post_meta( $post->ID, '_destino_descripcion_corta', true );
+    $cta_text = get_post_meta( $post->ID, '_destino_cta_text', true );
+    $cta_url = get_post_meta( $post->ID, '_destino_cta_url', true );
+    $galeria = get_post_meta( $post->ID, '_destino_galeria', true );
+
+    ?>
+    <style>
+        .destino-meta-field { margin-bottom: 20px; }
+        .destino-meta-field label { display: block; font-weight: 600; margin-bottom: 5px; }
+        .destino-meta-field input[type="text"],
+        .destino-meta-field input[type="url"],
+        .destino-meta-field textarea { width: 100%; padding: 8px; }
+        .destino-meta-field textarea { min-height: 80px; }
+        .destino-meta-checkbox { display: flex; align-items: center; gap: 10px; }
+        .destino-meta-checkbox input[type="checkbox"] { width: auto; }
+    </style>
+
+    <div class="destino-meta-field">
+        <label for="destino_ubicacion">Ubicación:</label>
+        <input type="text" id="destino_ubicacion" name="destino_ubicacion" value="<?php echo esc_attr( $ubicacion ); ?>" placeholder="Ej: Riviera Maya, Quintana Roo">
+        <small style="color: #666;">Ciudad, estado o región del destino</small>
+    </div>
+
+    <div class="destino-meta-field destino-meta-checkbox">
+        <input type="checkbox" id="destino_destacado" name="destino_destacado" value="1" <?php checked( $destacado, '1' ); ?>>
+        <label for="destino_destacado">Mostrar en el slider principal (destacado)</label>
+    </div>
+
+    <div class="destino-meta-field">
+        <label for="destino_descripcion_corta">Descripción corta para slider:</label>
+        <textarea id="destino_descripcion_corta" name="destino_descripcion_corta" placeholder="Frase atractiva de 10-15 palabras máximo"><?php echo esc_textarea( $descripcion_corta ); ?></textarea>
+        <small style="color: #666;">Texto breve que aparecerá en el slider (máx. 100 caracteres recomendado)</small>
+    </div>
+
+    <div class="destino-meta-field">
+        <label for="destino_cta_text">Texto del botón (CTA):</label>
+        <input type="text" id="destino_cta_text" name="destino_cta_text" value="<?php echo esc_attr( $cta_text ); ?>" placeholder="Ej: Explorar Destino, Descubrir Más">
+        <small style="color: #666;">Deja vacío para usar "Explorar Destino" por defecto</small>
+    </div>
+
+    <div class="destino-meta-field">
+        <label for="destino_cta_url">URL del botón (opcional):</label>
+        <input type="url" id="destino_cta_url" name="destino_cta_url" value="<?php echo esc_attr( $cta_url ); ?>" placeholder="https://ejemplo.com/tours">
+        <small style="color: #666;">Deja vacío para usar el enlace del destino por defecto</small>
+    </div>
+
+    <div class="destino-meta-field">
+        <label for="destino_galeria">Galería de imágenes (URLs separadas por comas):</label>
+        <textarea id="destino_galeria" name="destino_galeria" placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"><?php echo esc_textarea( $galeria ); ?></textarea>
+        <small style="color: #666;">Ingresa las URLs de las imágenes separadas por comas</small>
+    </div>
+    <?php
+}
+
+function turismo_save_destino_meta( $post_id ) {
+    if ( ! isset( $_POST['turismo_destino_nonce'] ) ) {
+        return;
+    }
+
+    if ( ! wp_verify_nonce( $_POST['turismo_destino_nonce'], 'turismo_save_destino_details' ) ) {
+        return;
+    }
+
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+        return;
+    }
+
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+
+    // Guardar ubicación
+    if ( isset( $_POST['destino_ubicacion'] ) ) {
+        update_post_meta( $post_id, '_destino_ubicacion', sanitize_text_field( $_POST['destino_ubicacion'] ) );
+    }
+
+    // Guardar destacado
+    if ( isset( $_POST['destino_destacado'] ) ) {
+        update_post_meta( $post_id, '_destino_destacado', '1' );
+    } else {
+        update_post_meta( $post_id, '_destino_destacado', '0' );
+    }
+
+    // Guardar descripción corta
+    if ( isset( $_POST['destino_descripcion_corta'] ) ) {
+        update_post_meta( $post_id, '_destino_descripcion_corta', sanitize_textarea_field( $_POST['destino_descripcion_corta'] ) );
+    }
+
+    // Guardar CTA text
+    if ( isset( $_POST['destino_cta_text'] ) ) {
+        update_post_meta( $post_id, '_destino_cta_text', sanitize_text_field( $_POST['destino_cta_text'] ) );
+    }
+
+    // Guardar CTA URL
+    if ( isset( $_POST['destino_cta_url'] ) ) {
+        update_post_meta( $post_id, '_destino_cta_url', esc_url_raw( $_POST['destino_cta_url'] ) );
+    }
+
+    // Guardar galería
+    if ( isset( $_POST['destino_galeria'] ) ) {
+        update_post_meta( $post_id, '_destino_galeria', sanitize_textarea_field( $_POST['destino_galeria'] ) );
+    }
+}
+add_action( 'save_post', 'turismo_save_destino_meta' );
