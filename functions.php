@@ -243,7 +243,7 @@ function turismo_customize_register( $wp_customize ) {
         'default' => '#0073aa',
         'transport' => 'postMessage',
     ));
-    
+
     $wp_customize->add_control( new WP_Customize_Color_Control(
         $wp_customize,
         'turismo_primary_color',
@@ -252,8 +252,67 @@ function turismo_customize_register( $wp_customize ) {
             'section' => 'colors',
         )
     ));
+
+    // Agregar sección para configuraciones del Home
+    $wp_customize->add_section( 'turismo_home_settings', array(
+        'title'    => __( 'Configuración del Home', 'turismo-custom' ),
+        'priority' => 30,
+    ));
+
+    // Setting: Categoría de destinos para mostrar en home
+    $wp_customize->add_setting( 'turismo_destinos_home_categoria', array(
+        'default'           => '',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+
+    // Control: Selector de categoría de destinos
+    $wp_customize->add_control( 'turismo_destinos_home_categoria', array(
+        'label'       => __( 'Categoría de Destinos en Home', 'turismo-custom' ),
+        'description' => __( 'Selecciona la categoría de destinos a mostrar en el home. Dejar vacío para mostrar todos.', 'turismo-custom' ),
+        'section'     => 'turismo_home_settings',
+        'type'        => 'select',
+        'choices'     => turismo_get_destinos_categorias_choices(),
+    ));
+
+    // Setting: Número de destinos a mostrar
+    $wp_customize->add_setting( 'turismo_destinos_home_cantidad', array(
+        'default'           => '6',
+        'sanitize_callback' => 'absint',
+    ));
+
+    $wp_customize->add_control( 'turismo_destinos_home_cantidad', array(
+        'label'       => __( 'Cantidad de Destinos', 'turismo-custom' ),
+        'description' => __( 'Número de destinos a mostrar en el home', 'turismo-custom' ),
+        'section'     => 'turismo_home_settings',
+        'type'        => 'number',
+        'input_attrs' => array(
+            'min'  => 1,
+            'max'  => 12,
+            'step' => 1,
+        ),
+    ));
 }
 add_action( 'customize_register', 'turismo_customize_register' );
+
+/**
+ * Helper: Obtener opciones de categorías de destinos para el Customizer
+ */
+function turismo_get_destinos_categorias_choices() {
+    $choices = array( '' => __( '-- Todas las categorías --', 'turismo-custom' ) );
+
+    $categorias = get_terms( array(
+        'taxonomy'   => 'categoria-destino',
+        'hide_empty' => false,
+    ));
+
+    if ( ! empty( $categorias ) && ! is_wp_error( $categorias ) ) {
+        foreach ( $categorias as $categoria ) {
+            $choices[ $categoria->slug ] = $categoria->name;
+        }
+    }
+
+    return $choices;
+}
 
 /**
  * 9. Custom Post Type: Videos de YouTube
@@ -1335,6 +1394,265 @@ function turismo_add_destino_meta_boxes() {
     );
 }
 add_action( 'add_meta_boxes', 'turismo_add_destino_meta_boxes' );
+
+/**
+ * 23. Custom Post Type: Atractivos Turísticos
+ */
+function turismo_register_atractivos_cpt() {
+    $labels = array(
+        'name'               => 'Atractivos Turísticos',
+        'singular_name'      => 'Atractivo',
+        'menu_name'          => 'Atractivos Turísticos',
+        'add_new'            => 'Añadir Atractivo',
+        'add_new_item'       => 'Añadir Nuevo Atractivo',
+        'edit_item'          => 'Editar Atractivo',
+        'new_item'           => 'Nuevo Atractivo',
+        'view_item'          => 'Ver Atractivo',
+        'search_items'       => 'Buscar Atractivos',
+        'not_found'          => 'No se encontraron atractivos',
+        'not_found_in_trash' => 'No hay atractivos en la papelera',
+    );
+
+    $args = array(
+        'labels'              => $labels,
+        'public'              => true,
+        'has_archive'         => true,
+        'publicly_queryable'  => true,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'query_var'           => true,
+        'rewrite'             => array( 'slug' => 'atractivos' ),
+        'capability_type'     => 'post',
+        'hierarchical'        => false,
+        'menu_position'       => 5,
+        'menu_icon'           => 'dashicons-location-alt',
+        'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'show_in_rest'        => true,
+        'taxonomies'          => array( 'ubicacion-atractivo', 'tipo-atractivo' ),
+    );
+
+    register_post_type( 'atractivo', $args );
+}
+add_action( 'init', 'turismo_register_atractivos_cpt' );
+
+/**
+ * 24. Taxonomías: Ubicación y Tipo de Atractivo
+ */
+function turismo_register_atractivo_taxonomies() {
+    // Taxonomía: Ubicación
+    $ubicacion_labels = array(
+        'name'              => 'Ubicaciones',
+        'singular_name'     => 'Ubicación',
+        'search_items'      => 'Buscar Ubicaciones',
+        'all_items'         => 'Todas las Ubicaciones',
+        'parent_item'       => 'Ubicación Padre',
+        'parent_item_colon' => 'Ubicación Padre:',
+        'edit_item'         => 'Editar Ubicación',
+        'update_item'       => 'Actualizar Ubicación',
+        'add_new_item'      => 'Añadir Nueva Ubicación',
+        'new_item_name'     => 'Nuevo Nombre de Ubicación',
+        'menu_name'         => 'Ubicaciones',
+    );
+
+    $ubicacion_args = array(
+        'hierarchical'      => true,
+        'labels'            => $ubicacion_labels,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'query_var'         => true,
+        'rewrite'           => array( 'slug' => 'ubicacion-atractivo' ),
+        'show_in_rest'      => true,
+    );
+
+    register_taxonomy( 'ubicacion-atractivo', array( 'atractivo' ), $ubicacion_args );
+
+    // Taxonomía: Tipo de Atractivo
+    $tipo_labels = array(
+        'name'              => 'Tipos de Atractivo',
+        'singular_name'     => 'Tipo',
+        'search_items'      => 'Buscar Tipos',
+        'all_items'         => 'Todos los Tipos',
+        'parent_item'       => 'Tipo Padre',
+        'parent_item_colon' => 'Tipo Padre:',
+        'edit_item'         => 'Editar Tipo',
+        'update_item'       => 'Actualizar Tipo',
+        'add_new_item'      => 'Añadir Nuevo Tipo',
+        'new_item_name'     => 'Nuevo Tipo de Atractivo',
+        'menu_name'         => 'Tipos',
+    );
+
+    $tipo_args = array(
+        'hierarchical'      => true,
+        'labels'            => $tipo_labels,
+        'show_ui'           => true,
+        'show_admin_column' => true,
+        'query_var'         => true,
+        'rewrite'           => array( 'slug' => 'tipo-atractivo' ),
+        'show_in_rest'      => true,
+    );
+
+    register_taxonomy( 'tipo-atractivo', array( 'atractivo' ), $tipo_args );
+}
+add_action( 'init', 'turismo_register_atractivo_taxonomies' );
+
+/**
+ * 25. Meta Boxes para Atractivos Turísticos
+ */
+function turismo_add_atractivo_meta_boxes() {
+    add_meta_box(
+        'turismo_atractivo_details',
+        'Detalles del Atractivo',
+        'turismo_atractivo_details_callback',
+        'atractivo',
+        'normal',
+        'high'
+    );
+}
+add_action( 'add_meta_boxes', 'turismo_add_atractivo_meta_boxes' );
+
+function turismo_atractivo_details_callback( $post ) {
+    wp_nonce_field( 'turismo_save_atractivo_details', 'turismo_atractivo_nonce' );
+
+    $horario = get_post_meta( $post->ID, '_atractivo_horario', true );
+    $precio_entrada = get_post_meta( $post->ID, '_atractivo_precio_entrada', true );
+    $telefono = get_post_meta( $post->ID, '_atractivo_telefono', true );
+    $sitio_web = get_post_meta( $post->ID, '_atractivo_sitio_web', true );
+    $direccion = get_post_meta( $post->ID, '_atractivo_direccion', true );
+    $galeria = get_post_meta( $post->ID, '_atractivo_galeria', true );
+    $caracteristicas = get_post_meta( $post->ID, '_atractivo_caracteristicas', true );
+
+    ?>
+    <style>
+        .atractivo-meta-field { margin-bottom: 20px; }
+        .atractivo-meta-field label { display: block; font-weight: 600; margin-bottom: 5px; }
+        .atractivo-meta-field input[type="text"],
+        .atractivo-meta-field input[type="url"],
+        .atractivo-meta-field textarea { width: 100%; padding: 8px; }
+        .atractivo-meta-field textarea { min-height: 80px; }
+        .atractivo-caracteristicas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .atractivo-caracteristicas-grid label { display: flex; align-items: center; gap: 5px; font-weight: normal; }
+    </style>
+
+    <div class="atractivo-meta-field">
+        <label for="atractivo_precio_entrada">Precio de entrada:</label>
+        <input type="text" id="atractivo_precio_entrada" name="atractivo_precio_entrada" value="<?php echo esc_attr( $precio_entrada ); ?>" placeholder="Ej: $100, Gratis, Entrada libre">
+        <small style="color: #666;">Ejemplo: $100, Gratis, Entrada libre, etc.</small>
+    </div>
+
+    <div class="atractivo-meta-field">
+        <label for="atractivo_horario">Horario de atención:</label>
+        <textarea id="atractivo_horario" name="atractivo_horario" placeholder="Ej: Lun-Dom: 9:00 AM - 6:00 PM"><?php echo esc_textarea( $horario ); ?></textarea>
+        <small style="color: #666;">Describe el horario de atención del atractivo</small>
+    </div>
+
+    <div class="atractivo-meta-field">
+        <label>Características:</label>
+        <div class="atractivo-caracteristicas-grid">
+            <?php
+            $caracteristicas_disponibles = array(
+                'estacionamiento' => 'Estacionamiento',
+                'guias_turisticos' => 'Guías turísticos',
+                'accesible' => 'Accesible',
+                'restaurante' => 'Restaurante/Cafetería',
+                'tienda_souvenirs' => 'Tienda de souvenirs',
+                'banos' => 'Baños',
+                'area_picnic' => 'Área de picnic',
+                'wifi' => 'WiFi',
+                'pet_friendly' => 'Mascotas permitidas',
+                'fotografia_permitida' => 'Fotografía permitida',
+                'aire_libre' => 'Aire libre',
+                'techado' => 'Techado/Interior',
+            );
+
+            $caracteristicas_seleccionadas = $caracteristicas ? json_decode( $caracteristicas, true ) : array();
+
+            foreach ( $caracteristicas_disponibles as $key => $label ) {
+                $checked = in_array( $key, (array) $caracteristicas_seleccionadas ) ? 'checked' : '';
+                echo '<label><input type="checkbox" name="atractivo_caracteristicas[]" value="' . esc_attr( $key ) . '" ' . $checked . '> ' . esc_html( $label ) . '</label>';
+            }
+            ?>
+        </div>
+    </div>
+
+    <div class="atractivo-meta-field">
+        <label for="atractivo_telefono">Teléfono:</label>
+        <input type="text" id="atractivo_telefono" name="atractivo_telefono" value="<?php echo esc_attr( $telefono ); ?>" placeholder="Ej: +52 123 456 7890">
+    </div>
+
+    <div class="atractivo-meta-field">
+        <label for="atractivo_sitio_web">Sitio Web:</label>
+        <input type="url" id="atractivo_sitio_web" name="atractivo_sitio_web" value="<?php echo esc_attr( $sitio_web ); ?>" placeholder="https://www.atractivo.com">
+    </div>
+
+    <div class="atractivo-meta-field">
+        <label for="atractivo_direccion">Dirección completa:</label>
+        <textarea id="atractivo_direccion" name="atractivo_direccion" placeholder="Calle, número, colonia, ciudad, estado"><?php echo esc_textarea( $direccion ); ?></textarea>
+    </div>
+
+    <div class="atractivo-meta-field">
+        <label for="atractivo_galeria">Galería de imágenes (URLs separadas por comas):</label>
+        <textarea id="atractivo_galeria" name="atractivo_galeria" placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"><?php echo esc_textarea( $galeria ); ?></textarea>
+        <small style="color: #666;">Ingresa las URLs de las imágenes separadas por comas. Puedes subir imágenes a la biblioteca de medios y copiar sus URLs.</small>
+    </div>
+    <?php
+}
+
+function turismo_save_atractivo_meta( $post_id ) {
+    if ( ! isset( $_POST['turismo_atractivo_nonce'] ) ) {
+        return;
+    }
+
+    if ( ! wp_verify_nonce( $_POST['turismo_atractivo_nonce'], 'turismo_save_atractivo_details' ) ) {
+        return;
+    }
+
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+        return;
+    }
+
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+
+    // Guardar precio de entrada
+    if ( isset( $_POST['atractivo_precio_entrada'] ) ) {
+        update_post_meta( $post_id, '_atractivo_precio_entrada', sanitize_text_field( $_POST['atractivo_precio_entrada'] ) );
+    }
+
+    // Guardar horario
+    if ( isset( $_POST['atractivo_horario'] ) ) {
+        update_post_meta( $post_id, '_atractivo_horario', sanitize_textarea_field( $_POST['atractivo_horario'] ) );
+    }
+
+    // Guardar características
+    if ( isset( $_POST['atractivo_caracteristicas'] ) ) {
+        $caracteristicas = array_map( 'sanitize_text_field', $_POST['atractivo_caracteristicas'] );
+        update_post_meta( $post_id, '_atractivo_caracteristicas', json_encode( $caracteristicas ) );
+    } else {
+        update_post_meta( $post_id, '_atractivo_caracteristicas', json_encode( array() ) );
+    }
+
+    // Guardar teléfono
+    if ( isset( $_POST['atractivo_telefono'] ) ) {
+        update_post_meta( $post_id, '_atractivo_telefono', sanitize_text_field( $_POST['atractivo_telefono'] ) );
+    }
+
+    // Guardar sitio web
+    if ( isset( $_POST['atractivo_sitio_web'] ) ) {
+        update_post_meta( $post_id, '_atractivo_sitio_web', esc_url_raw( $_POST['atractivo_sitio_web'] ) );
+    }
+
+    // Guardar dirección
+    if ( isset( $_POST['atractivo_direccion'] ) ) {
+        update_post_meta( $post_id, '_atractivo_direccion', sanitize_textarea_field( $_POST['atractivo_direccion'] ) );
+    }
+
+    // Guardar galería
+    if ( isset( $_POST['atractivo_galeria'] ) ) {
+        update_post_meta( $post_id, '_atractivo_galeria', sanitize_textarea_field( $_POST['atractivo_galeria'] ) );
+    }
+}
+add_action( 'save_post', 'turismo_save_atractivo_meta' );
 
 function turismo_destino_details_callback( $post ) {
     wp_nonce_field( 'turismo_save_destino_details', 'turismo_destino_nonce' );

@@ -430,3 +430,110 @@ Ver información:
    git diff                         # Ver cambios
 
 ================================================================================
+
+
+estonces dime aqui paso a paso, despues leere el archivo, pasa a paso, lo quetengo que hacer para       
+guardar lo que llevo hecho hasta ahora , dimelo asi primero ejectura esto etc 
+  ⎿  ⧉ Selected 1 lines from INSTRUCCIONES-GIT.txt in Visual Studio Code
+
+● Perfecto, te explico paso a paso qué ejecutar para guardar todo tu trabajo actual:
+
+  PASO A PASO PARA GUARDAR TU TRABAJO:
+
+  PASO 1: Ver qué archivos cambiaron
+
+  Ejecuta esto:
+  git status
+  Este comando te muestra todos los archivos que modificaste.
+
+  ---
+  PASO 2: Agregar todos los archivos al área de preparación
+
+  Ejecuta esto:
+  git add .
+  El punto (.) significa "todos los archivos". Esto prepara tus cambios para guardarlos.
+
+  ---
+  PASO 3: Guardar los cambios con un mensaje descriptivo
+
+  Ejecuta esto:
+  git commit -m "Actualización de guía Git y cambios en restaurantes"
+  Puedes cambiar el mensaje entre comillas por lo que mejor describa tus cambios.
+
+  ---
+  PASO 4: Subir los cambios al repositorio remoto (GitHub, GitLab, etc.)
+
+  Ejecuta esto:
+  git push origin main
+  (Si tu rama se llama "master" en lugar de "main", usa git push origin master)
+
+  ---
+  RESUMEN EJECUTIVO:
+
+  Copia y pega estos 4 comandos uno por uno:
+
+  git status
+  git add .
+  git commit -m "Actualización de guía Git y cambios en restaurantes"
+  git push origin main
+
+  ---
+  IMPORTANTE:
+  - Si al hacer git push te dice que no tienes configurado el remote, primero tendrás que ejecutar:       
+  git remote add origin [URL-DE-TU-REPOSITORIO]
+  - Si te pide usuario y contraseña, ingrésalos cuando te los solicite.
+
+  Ejecuta esos comandos en orden y listo, tu trabajo quedará guardado tanto local como remotamente.       
+
+> entonces el push siempre es en remoto , entonces git add . prepara pero no hace cambios, y git 
+commit aplica los cambios, y listo esto es mi local, en mi git local ? 
+
+● ¡EXACTO! Lo entendiste perfectamente. Déjame confirmártelo:
+
+  SÍ, así es:
+
+  git add .
+
+  - Prepara los archivos para guardar
+  - NO hace cambios permanentes todavía
+  - Solo los pone en el "área de preparación" (staging area)
+  - Es como decirle a Git: "estos archivos quiero guardar"
+
+  ---
+  git commit -m "mensaje"
+
+  - SÍ aplica los cambios y los guarda
+  - Esto es LOCAL (solo en tu computadora)
+  - Crea un punto de guardado permanente en tu Git local
+  - Es como crear una "fotografía" de tu código en ese momento
+
+  ---
+  git push origin main
+
+  - SÍ es REMOTO
+  - Sube tus commits locales al servidor remoto (GitHub, GitLab, etc.)
+  - Es como hacer un respaldo en la nube
+  - Otros desarrolladores pueden ver tus cambios
+
+  ---
+  RESUMEN VISUAL:
+
+  Tu código modificado
+          ↓
+     git add .          (preparar)
+          ↓
+     STAGING AREA       (archivos listos para guardar)
+          ↓
+     git commit         (guardar LOCAL en tu computadora)
+          ↓
+     GIT LOCAL          (guardado en .git de tu computadora)
+          ↓
+     git push           (subir REMOTO al servidor)
+          ↓
+     GIT REMOTO         (GitHub/GitLab - en internet)
+
+  Entonces:
+  - git add + git commit = Trabajo guardado en tu computadora (LOCAL)
+  - git push = Trabajo respaldado en el servidor (REMOTO)
+
+  Lo captaste perfecto.
