@@ -291,6 +291,113 @@ function turismo_customize_register( $wp_customize ) {
             'step' => 1,
         ),
     ));
+
+    // Agregar sección para configuraciones de contacto
+    $wp_customize->add_section( 'turismo_contacto_settings', array(
+        'title'    => __( 'Información de Contacto', 'turismo-custom' ),
+        'priority' => 35,
+    ));
+
+    // Dirección
+    $wp_customize->add_setting( 'turismo_contacto_direccion', array(
+        'default'           => '',
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_direccion', array(
+        'label'   => __( 'Dirección', 'turismo-custom' ),
+        'section' => 'turismo_contacto_settings',
+        'type'    => 'textarea',
+    ));
+
+    // Teléfono
+    $wp_customize->add_setting( 'turismo_contacto_telefono', array(
+        'default'           => '',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_telefono', array(
+        'label'   => __( 'Teléfono', 'turismo-custom' ),
+        'section' => 'turismo_contacto_settings',
+        'type'    => 'text',
+    ));
+
+    // Email
+    $wp_customize->add_setting( 'turismo_contacto_email', array(
+        'default'           => '',
+        'sanitize_callback' => 'sanitize_email',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_email', array(
+        'label'   => __( 'Email', 'turismo-custom' ),
+        'section' => 'turismo_contacto_settings',
+        'type'    => 'email',
+    ));
+
+    // Horario
+    $wp_customize->add_setting( 'turismo_contacto_horario', array(
+        'default'           => '',
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_horario', array(
+        'label'       => __( 'Horario de Atención', 'turismo-custom' ),
+        'description' => __( 'Ejemplo: Lun-Vie: 9:00 AM - 6:00 PM', 'turismo-custom' ),
+        'section'     => 'turismo_contacto_settings',
+        'type'        => 'textarea',
+    ));
+
+    // URL de Google Maps
+    $wp_customize->add_setting( 'turismo_contacto_maps_url', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_maps_url', array(
+        'label'       => __( 'URL de Google Maps (embed)', 'turismo-custom' ),
+        'description' => __( 'URL del iframe de Google Maps. Ejemplo: https://www.google.com/maps/embed?pb=...', 'turismo-custom' ),
+        'section'     => 'turismo_contacto_settings',
+        'type'        => 'url',
+    ));
+
+    // Facebook
+    $wp_customize->add_setting( 'turismo_contacto_facebook', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_facebook', array(
+        'label'   => __( 'Facebook URL', 'turismo-custom' ),
+        'section' => 'turismo_contacto_settings',
+        'type'    => 'url',
+    ));
+
+    // Instagram
+    $wp_customize->add_setting( 'turismo_contacto_instagram', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_instagram', array(
+        'label'   => __( 'Instagram URL', 'turismo-custom' ),
+        'section' => 'turismo_contacto_settings',
+        'type'    => 'url',
+    ));
+
+    // Twitter
+    $wp_customize->add_setting( 'turismo_contacto_twitter', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_twitter', array(
+        'label'   => __( 'Twitter URL', 'turismo-custom' ),
+        'section' => 'turismo_contacto_settings',
+        'type'    => 'url',
+    ));
+
+    // YouTube
+    $wp_customize->add_setting( 'turismo_contacto_youtube', array(
+        'default'           => '',
+        'sanitize_callback' => 'esc_url_raw',
+    ));
+    $wp_customize->add_control( 'turismo_contacto_youtube', array(
+        'label'   => __( 'YouTube URL', 'turismo-custom' ),
+        'section' => 'turismo_contacto_settings',
+        'type'    => 'url',
+    ));
 }
 add_action( 'customize_register', 'turismo_customize_register' );
 
@@ -1763,3 +1870,119 @@ function turismo_save_destino_meta( $post_id ) {
     }
 }
 add_action( 'save_post', 'turismo_save_destino_meta' );
+
+/**
+ * 26. Procesar formulario de contacto via AJAX
+ */
+function turismo_enviar_contacto() {
+    // Verificar nonce
+    if ( ! isset( $_POST['contacto_nonce'] ) || ! wp_verify_nonce( $_POST['contacto_nonce'], 'turismo_contacto_nonce' ) ) {
+        wp_send_json_error( array(
+            'message' => 'Error de seguridad. Por favor recarga la página e intenta nuevamente.'
+        ));
+    }
+
+    // Validar campos requeridos
+    $nombre = isset( $_POST['contacto_nombre'] ) ? sanitize_text_field( $_POST['contacto_nombre'] ) : '';
+    $email = isset( $_POST['contacto_email'] ) ? sanitize_email( $_POST['contacto_email'] ) : '';
+    $asunto = isset( $_POST['contacto_asunto'] ) ? sanitize_text_field( $_POST['contacto_asunto'] ) : '';
+    $mensaje = isset( $_POST['contacto_mensaje'] ) ? sanitize_textarea_field( $_POST['contacto_mensaje'] ) : '';
+    $telefono = isset( $_POST['contacto_telefono'] ) ? sanitize_text_field( $_POST['contacto_telefono'] ) : '';
+
+    // Validaciones
+    if ( empty( $nombre ) || empty( $email ) || empty( $asunto ) || empty( $mensaje ) ) {
+        wp_send_json_error( array(
+            'message' => 'Por favor completa todos los campos requeridos.'
+        ));
+    }
+
+    if ( ! is_email( $email ) ) {
+        wp_send_json_error( array(
+            'message' => 'Por favor ingresa un email válido.'
+        ));
+    }
+
+    // Preparar el correo
+    $admin_email = get_theme_mod( 'turismo_contacto_email', get_option( 'admin_email' ) );
+
+    $email_subject = 'Nuevo mensaje de contacto: ' . $asunto;
+
+    $email_body = "Has recibido un nuevo mensaje desde el formulario de contacto.\n\n";
+    $email_body .= "Nombre: {$nombre}\n";
+    $email_body .= "Email: {$email}\n";
+    if ( ! empty( $telefono ) ) {
+        $email_body .= "Teléfono: {$telefono}\n";
+    }
+    $email_body .= "Asunto: {$asunto}\n\n";
+    $email_body .= "Mensaje:\n{$mensaje}\n\n";
+    $email_body .= "---\n";
+    $email_body .= "Este mensaje fue enviado desde: " . get_bloginfo( 'name' ) . " (" . home_url() . ")";
+
+    $headers = array(
+        'Content-Type: text/plain; charset=UTF-8',
+        'From: ' . get_bloginfo( 'name' ) . ' <' . $admin_email . '>',
+        'Reply-To: ' . $nombre . ' <' . $email . '>'
+    );
+
+    // Enviar el correo
+    $enviado = wp_mail( $admin_email, $email_subject, $email_body, $headers );
+
+    if ( $enviado ) {
+        // Enviar correo de confirmación al usuario
+        $user_subject = 'Gracias por contactarnos - ' . get_bloginfo( 'name' );
+        $user_body = "Hola {$nombre},\n\n";
+        $user_body .= "Gracias por ponerte en contacto con nosotros. Hemos recibido tu mensaje y te responderemos lo antes posible.\n\n";
+        $user_body .= "Resumen de tu mensaje:\n";
+        $user_body .= "Asunto: {$asunto}\n";
+        $user_body .= "Mensaje: {$mensaje}\n\n";
+        $user_body .= "Saludos,\n";
+        $user_body .= get_bloginfo( 'name' );
+
+        $user_headers = array(
+            'Content-Type: text/plain; charset=UTF-8',
+            'From: ' . get_bloginfo( 'name' ) . ' <' . $admin_email . '>'
+        );
+
+        wp_mail( $email, $user_subject, $user_body, $user_headers );
+
+        wp_send_json_success( array(
+            'message' => '¡Mensaje enviado exitosamente! Te responderemos pronto.'
+        ));
+    } else {
+        wp_send_json_error( array(
+            'message' => 'Hubo un error al enviar el mensaje. Por favor intenta nuevamente o contáctanos directamente.'
+        ));
+    }
+}
+add_action( 'wp_ajax_turismo_enviar_contacto', 'turismo_enviar_contacto' );
+add_action( 'wp_ajax_nopriv_turismo_enviar_contacto', 'turismo_enviar_contacto' );
+
+/**
+ * 27. Configurar SMTP para envío de correos
+ */
+function turismo_configurar_smtp( $phpmailer ) {
+    $phpmailer->isSMTP();
+    $phpmailer->Host       = 'mail.choix.gob.mx';
+    $phpmailer->SMTPAuth   = true;
+    $phpmailer->Port       = 465;
+    $phpmailer->Username   = 'turismo@choix.gob.mx';
+    $phpmailer->Password   = 'turismo2025';
+    $phpmailer->SMTPSecure = 'ssl';
+    $phpmailer->From       = 'turismo@choix.gob.mx';
+    $phpmailer->FromName   = get_bloginfo( 'name' );
+
+    // Habilitar debugging (comentar estas líneas en producción)
+    $phpmailer->SMTPDebug = 2; // 0 = off, 1 = client, 2 = client and server
+    $phpmailer->Debugoutput = function($str, $level) {
+        error_log("SMTP Debug level $level: $str");
+    };
+}
+add_action( 'phpmailer_init', 'turismo_configurar_smtp' );
+
+/**
+ * 28. Capturar errores de email
+ */
+function turismo_log_email_errors( $wp_error ) {
+    error_log( 'Error al enviar email: ' . $wp_error->get_error_message() );
+}
+add_action( 'wp_mail_failed', 'turismo_log_email_errors' );
